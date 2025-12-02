@@ -29,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-7q0@kg+emzw8k12tpxn1e=ob6(pu0u$xjup)c=9cm*k&&0_uin'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
@@ -76,10 +76,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'setup.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# Bloco de DATABASES (A partir daqui)
 
-# Configuração de Banco de Dados Híbrida
+# 1. Configuração padrão para Desenvolvimento Local (lê o .env)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -91,9 +90,15 @@ DATABASES = {
     }
 }
 
-# Se existir a variável DATABASE_URL (no Render), ela sobrescreve a configuração acima
-if os.getenv('DATABASE_URL'):
-    DATABASES['default'] = dj_database_url.config(default=os.getenv('DATABASE_URL'))
+# 2. Sobrescreve a configuração se a variável DATABASE_URL (do Render) for encontrada
+database_url = os.getenv('DATABASE_URL')
+if database_url:
+    DATABASES['default'] = dj_database_url.config(
+        default=database_url, 
+        conn_max_age=600, 
+        ssl_require=True
+    )
+
 
 
 # Password validation
