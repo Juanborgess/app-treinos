@@ -1,0 +1,115 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Rotina</title>
+    <link rel="stylesheet" href="{% static 'treinos/style.css' %}">
+    <style>
+        /* Estilizando o formulário para ficar Dark/Cyberpunk */
+        .form-group { margin-bottom: 20px; }
+        
+        label { display: block; color: var(--text-muted); margin-bottom: 8px; font-weight: bold; }
+        
+        /* Input de Texto do Nome */
+        input[type="text"] {
+            width: 100%; padding: 12px; background: #09090b; border: 1px solid #3f3f46;
+            color: white; border-radius: 8px; font-size: 1rem;
+        }
+
+        /* Grade de Exercícios */
+        .checkbox-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+            max-height: 400px; overflow-y: auto; /* Scroll se tiver muitos */
+        }
+
+        /* Esconde o checkbox original feio */
+        .checkbox-grid input[type="checkbox"] { display: none; }
+
+        /* Cria nosso botão personalizado */
+        .checkbox-grid label {
+            background: #18181b; border: 1px solid #3f3f46; padding: 15px;
+            border-radius: 8px; cursor: pointer; text-align: center;
+            transition: all 0.2s; color: #fff;
+        }
+
+        /* Quando selecionado (Checked) */
+        .checkbox-grid input[type="checkbox"]:checked + label {
+            border-color: var(--primary); background: rgba(34, 211, 238, 0.1);
+            color: var(--primary); box-shadow: 0 0 10px rgba(34, 211, 238, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <header style="grid-template-columns: auto 1fr 40px;">
+        
+        <a href="{% url 'home' %}" style="color: #ef4444; font-size: 0.9rem; text-decoration: none; font-weight: 500;">
+            Cancelar
+        </a>
+
+        <div class="logo">Nova <span>Rotina</span></div>
+        
+        <div></div> 
+    </header>
+
+    <main>
+
+        {% if form.errors %}
+            <div style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <p style="font-weight: bold; margin-bottom: 5px;">Ops! Corrija os erros abaixo:</p>
+                <ul style="list-style: none; padding: 0;">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>• {{ field.label }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>• {{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <label>Selecione os Exercícios:</label>
+        <a href="{% url 'criar_exercicio' %}" style="font-size: 0.8rem; color: var(--primary); text-decoration: none;">+ Criar Novo</a>
+    </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>Nome do Treino</label>
+                {{ form.nome }}
+            </div>
+
+            <div class="form-group">
+                <label>Selecione os Exercícios:</label>
+                
+                <div class="form-group">
+                <input type="text" id="filtroExercicios" onkeyup="filtrarGrid()" placeholder="🔍 Buscar exercício para adicionar..." 
+                       style="margin-bottom: 10px; background: #121214; border: 1px solid #333;">
+            </div>
+
+                <div class="checkbox-grid" id="gridExercicios">
+                    {% for checkbox in form.exercicios %}
+                    <div>
+                        {{ checkbox.tag }}
+                        <label for="{{ checkbox.id_for_label }}">{{ checkbox.choice_label }}</label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn-full" style="margin-top: 20px;">CRIAR ROTINA</button>
+        </form>
+    </main>
+
+    {% if messages %}
+        {% endif %}
+
+        <script src="{% static 'treinos/criar_rotina.js' %}"></script>
+</body>
+</html>

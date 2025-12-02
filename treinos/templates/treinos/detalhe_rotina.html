@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ rotina.nome }}</title>
+    <link rel="stylesheet" href="{% static 'treinos/style.css' %}">
+</head>
+<body>
+
+    <header>
+        <a href="{% url 'home' %}" style="color: #a1a1aa; display: flex; align-items: center; justify-content: center;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+        </a>
+
+        <div class="logo" style="color: #fff;">{{ rotina.nome }}</div>
+        
+        <div style="width: 24px;"></div> 
+    </header>
+
+    <main>
+        <h2 style="margin-top: 10px;">Exercícios</h2>
+
+        <div class="card-list">
+            {% for exercicio in rotina.exercicios.all %}
+            <div class="card" style="cursor: default;"> <div class="card-header">
+                    <h3 class="card-title">{{ exercicio.nome }}</h3>
+                    <span class="badge">{{ exercicio.get_grupo_muscular_display }}</span>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">
+                    4 Séries planejadas
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+
+       <a href="{% url 'iniciar_treino' rotina.id %}" class="fab pulse-glow" style="width: 100%; border-radius: 12px; bottom: 20px; right: 0; position: relative; margin-top: 30px; font-weight: bold; font-size: 1.1rem; color: #000; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+            INICIAR TREINO
+        </a>
+
+    </main>
+
+</body>
+</html>

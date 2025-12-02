@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novo Exercício</title>
+    <link rel="stylesheet" href="{% static 'treinos/style.css' %}">
+</head>
+<body>
+    <header>
+        <div class="logo">Novo <span>Exercício</span></div>
+        <a href="{% url 'criar_rotina' %}" style="color: #71717a; text-decoration: none;">Voltar</a>
+    </header>
+    <main style="max-width: 400px; margin: 20px auto;">
+        <form method="post" action="{{ request.get_full_path }}">
+            {% csrf_token %}
+            <label style="color: #a1a1aa; display:block; margin-bottom:5px;">Nome</label>
+            {{ form.nome }}
+            <br><br>
+            <label style="color: #a1a1aa; display:block; margin-bottom:5px;">Grupo Muscular</label>
+            {{ form.grupo_muscular }}
+            
+            <button type="submit" class="btn-full" style="margin-top: 30px;">SALVAR</button>
+        </form>
+    </main>
+</body>
+</html>

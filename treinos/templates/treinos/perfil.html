@@ -1,0 +1,260 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Perfil do Atleta</title>
+    <link rel="stylesheet" href="{% static 'treinos/style.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'treinos/img/favicon.png' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .profile-header-card { text-align: center; padding: 30px 20px; margin-bottom: 20px; }
+        .avatar-large {
+            width: 80px; height: 80px; background: var(--primary); color: #000;
+            border-radius: 50%; margin: 0 auto 15px auto;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.5rem; font-weight: 800; box-shadow: 0 0 25px var(--primary-glow);
+        }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 30px; }
+        .stat-box {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+            border-radius: 16px; padding: 15px; text-align: center;
+        }
+        .history-item, .measure-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.95rem; color: #fff;
+        }
+        .measure-label { color: #a1a1aa; }
+        .measure-value { font-weight: 600; color: #fff; }
+        
+        /* Estilo dos inputs do Modal de Medidas */
+        .measure-input-group {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;
+        }
+        .measure-input-group label { display: block; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 5px; }
+        .measure-input-group input { text-align: center; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="{% url 'home' %}" style="color: #a1a1aa; display: flex; align-items: center; justify-content: center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+        </a>
+        <div class="logo">Meu <span>Perfil</span></div>
+        <button onclick="abrirModalPeso()" style="background: none; border: none; color: var(--primary);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+        </button>
+    </header>
+
+    <main style="padding-bottom: 100px;">
+        
+        <div class="profile-header-card">
+            <div class="avatar-large">{{ user.username|slice:":1"|upper }}</div>
+            <h2 style="color: white; margin: 0;">{{ user.username }}</h2>
+            <div style="display: inline-block; margin-top: 10px; padding: 4px 12px; border-radius: 20px; border: 1px solid {{ cor_nivel }}; color: {{ cor_nivel }}; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
+                {{ nivel }}
+            </div>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-box">
+                <div style="font-size: 1.5rem; font-weight: 800; color: #fff;">{{ total_treinos }}</div>
+                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Treinos</div>
+            </div>
+            <div class="stat-box">
+                <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">{{ volume_display }}</div>
+                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Total Levantado</div>
+            </div>
+        </div>
+
+        <h3 style="color: #71717a; font-size: 0.9rem; margin: 25px 0 10px 0; padding-left: 5px; text-transform: uppercase; font-weight: 700;">Painel</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px;">
+            
+            <a href="{% url 'estatisticas' %}" class="card" style="padding: 20px; text-decoration: none; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; transition: transform 0.2s;">
+                <div style="background: rgba(34, 211, 238, 0.1); padding: 10px; border-radius: 12px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="var(--primary)" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                    </svg>
+                </div>
+                <span style="color: #fff; font-weight: 600; font-size: 0.95rem;">Estatísticas</span>
+            </a>
+
+            <div onclick="abrirModalPeso()" class="card" style="padding: 20px; cursor: pointer; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; transition: transform 0.2s;">
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 12px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18m9-9H3" />
+                    </svg>
+                </div>
+                <span style="color: #fff; font-weight: 600; font-size: 0.95rem;">Registrar Peso</span>
+            </div>
+
+        </div>
+
+        <h3 style="color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; margin-bottom: 10px; padding-left: 5px;">Peso Corporal</h3>
+        <div class="card" style="padding: 20px; height: 260px; margin-bottom: 30px;">
+            {% if historico_peso %}
+                <canvas id="weightChart"></canvas>
+            {% else %}
+                <div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted);">
+                    <p style="font-size: 0.85rem;">Sem dados recentes</p>
+                    <button onclick="abrirModalPeso()" style="margin-top: 10px; color: var(--primary); background: none; border: 1px dashed var(--primary); padding: 5px 15px; border-radius: 8px;">Registrar</button>
+                </div>
+            {% endif %}
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; padding-left: 5px; margin: 0;">Medidas (cm)</h3>
+            <button onclick="abrirModalMedidas()" style="font-size: 0.8rem; color: var(--primary); background: none; border: none;">Editar</button>
+        </div>
+
+        <div style="padding: 0 10px; margin-bottom: 40px;">
+            <div class="measure-item"><span class="measure-label">Gordura Corporal %</span><span class="measure-value">{{ medidas.gordura|default:"-" }}%</span></div>
+            <div class="measure-item"><span class="measure-label">Pescoço</span><span class="measure-value">{{ medidas.pescoco|default:"-" }}</span></div>
+            <div class="measure-item"><span class="measure-label">Ombro</span><span class="measure-value">{{ medidas.ombro|default:"-" }}</span></div>
+            <div class="measure-item"><span class="measure-label">Peito</span><span class="measure-value">{{ medidas.peito|default:"-" }}</span></div>
+            <div class="measure-item"><span class="measure-label">Bíceps Esq.</span><span class="measure-value">{{ medidas.biceps_e|default:"-" }}</span></div>
+            <div class="measure-item"><span class="measure-label">Bíceps Dir.</span><span class="measure-value">{{ medidas.biceps_d|default:"-" }}</span></div>
+            <div class="measure-item"><span class="measure-label">Antebraço Esq.</span><span class="measure-value">{{ medidas.antebraco_e|default:"-" }}</span></div>
+            <div class="measure-item"><span class="measure-label">Antebraço Dir.</span><span class="measure-value">{{ medidas.antebraco_d|default:"-" }}</span></div>
+            <div class="measure-item"><span class="measure-label">Cintura</span><span class="measure-value">{{ medidas.cintura|default:"-" }}</span></div>
+            <div class="measure-item"><span class="measure-label">Coxa Esq.</span><span class="measure-value">{{ medidas.coxa_e|default:"-" }}</span></div>
+            <div class="measure-item"><span class="measure-label">Coxa Dir.</span><span class="measure-value">{{ medidas.coxa_d|default:"-" }}</span></div>
+            <div class="measure-item"><span class="measure-label">Panturrilha Esq.</span><span class="measure-value">{{ medidas.panturrilha_e|default:"-" }}</span></div>
+            <div class="measure-item"><span class="measure-label">Panturrilha Dir.</span><span class="measure-value">{{ medidas.panturrilha_d|default:"-" }}</span></div>
+        </div>
+
+        <div style="margin-top: 20px;">
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" style="background: none; border: none; color: #ef4444; font-size: 0.9rem; cursor: pointer; padding: 0; font-family: 'Inter', sans-serif;">
+                        Sair da conta
+                    </button>
+                </form>
+            </div>
+
+    </main>
+
+    <div id="modalPeso" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; backdrop-filter: blur(5px); align-items: center; justify-content: center;">
+        <div class="card" style="width: 90%; max-width: 350px; padding: 30px;">
+            <h3 style="margin-bottom: 25px; text-align: center;">Registrar Peso</h3>
+            <form action="{% url 'adicionar_peso' %}" method="POST">
+                {% csrf_token %}
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <input type="number" step="0.1" name="peso" style="font-size: 2rem; text-align: center; background: transparent !important; border: none !important; border-bottom: 2px solid var(--primary) !important; border-radius: 0 !important; color: var(--primary) !important;" autofocus required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <button type="button" onclick="document.getElementById('modalPeso').style.display='none'" style="background: #27272a; color: #fff; padding: 12px; border-radius: 12px;">Cancelar</button>
+                    <button type="submit" style="background: var(--primary); color: #000; font-weight: 700; padding: 12px; border-radius: 12px;">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalMedidas" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; overflow-y: auto;">
+        <div style="padding: 20px; padding-bottom: 100px;">
+            <h2 style="text-align: center; margin-bottom: 20px; color: #fff;">Atualizar Medidas</h2>
+            
+            <form action="{% url 'registrar_medidas' %}" method="POST">
+                {% csrf_token %}
+                
+                <h3 style="color: var(--primary); font-size: 0.9rem; margin-bottom: 10px;">Geral</h3>
+                <div class="measure-input-group">
+                    <div><label>Gordura %</label><input type="number" step="0.1" name="gordura" value="{{ medidas.gordura|default_if_none:'' }}"></div>
+                    <div><label>Pescoço</label><input type="number" step="0.1" name="pescoco" value="{{ medidas.pescoco|default_if_none:'' }}"></div>
+                </div>
+
+                <h3 style="color: var(--primary); font-size: 0.9rem; margin: 20px 0 10px 0;">Tronco</h3>
+                <div class="measure-input-group">
+                    <div><label>Ombro</label><input type="number" step="0.1" name="ombro" value="{{ medidas.ombro|default_if_none:'' }}"></div>
+                    <div><label>Peito</label><input type="number" step="0.1" name="peito" value="{{ medidas.peito|default_if_none:'' }}"></div>
+                    <div><label>Cintura</label><input type="number" step="0.1" name="cintura" value="{{ medidas.cintura|default_if_none:'' }}"></div>
+                </div>
+
+                <h3 style="color: var(--primary); font-size: 0.9rem; margin: 20px 0 10px 0;">Braços (Esq / Dir)</h3>
+                <div class="measure-input-group">
+                    <div><label>Bíceps E.</label><input type="number" step="0.1" name="biceps_e" value="{{ medidas.biceps_e|default_if_none:'' }}"></div>
+                    <div><label>Bíceps D.</label><input type="number" step="0.1" name="biceps_d" value="{{ medidas.biceps_d|default_if_none:'' }}"></div>
+                    <div><label>Antebraço E.</label><input type="number" step="0.1" name="antebraco_e" value="{{ medidas.antebraco_e|default_if_none:'' }}"></div>
+                    <div><label>Antebraço D.</label><input type="number" step="0.1" name="antebraco_d" value="{{ medidas.antebraco_d|default_if_none:'' }}"></div>
+                </div>
+
+                <h3 style="color: var(--primary); font-size: 0.9rem; margin: 20px 0 10px 0;">Pernas (Esq / Dir)</h3>
+                <div class="measure-input-group">
+                    <div><label>Coxa E.</label><input type="number" step="0.1" name="coxa_e" value="{{ medidas.coxa_e|default_if_none:'' }}"></div>
+                    <div><label>Coxa D.</label><input type="number" step="0.1" name="coxa_d" value="{{ medidas.coxa_d|default_if_none:'' }}"></div>
+                    <div><label>Panturrilha E.</label><input type="number" step="0.1" name="panturrilha_e" value="{{ medidas.panturrilha_e|default_if_none:'' }}"></div>
+                    <div><label>Panturrilha D.</label><input type="number" step="0.1" name="panturrilha_d" value="{{ medidas.panturrilha_d|default_if_none:'' }}"></div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px;">
+                    <button type="button" onclick="document.getElementById('modalMedidas').style.display='none'" style="background: #27272a; color: #fff; padding: 15px; border-radius: 12px; width: 100%;">Cancelar</button>
+                    <button type="submit" class="btn-full" style="margin: 0; width: 100%;">Salvar Medidas</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function abrirModalPeso() { document.getElementById('modalPeso').style.display = 'flex'; }
+        function abrirModalMedidas() { document.getElementById('modalMedidas').style.display = 'block'; }
+
+        // Gráfico
+        const ctx = document.getElementById('weightChart');
+        if (ctx && {{ historico_peso|length }} > 0) {
+            const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(34, 211, 238, 0.4)');
+            gradient.addColorStop(1, 'rgba(34, 211, 238, 0)');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: {{ labels_peso|safe }},
+                    datasets: [{
+                        label: 'Peso (kg)',
+                        data: {{ data_peso|safe }},
+                        borderColor: '#22d3ee',
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#18181b',
+                        pointBorderColor: '#22d3ee',
+                        pointBorderWidth: 2,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { grid: { color: '#27272a' }, ticks: { color: '#71717a' } }
+                    }
+                }
+            });
+        }
+    </script>
+
+    <nav class="bottom-nav">
+        <a href="{% url 'home' %}" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg><span>Início</span></a>
+        <a href="{% url 'criar_rotina' %}" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg><span>Criar</span></a>
+        <a href="{% url 'dashboard' %}" class="nav-item"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg><span>Evolução</span></a>
+        <a href="{% url 'perfil' %}" class="nav-item active"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg><span>Perfil</span></a>
+    </nav>
+
+    {% if messages %}
+    <div class="toast-container">
+        {% for message in messages %}
+        <div class="toast {{ message.tags }}"><span>{{ message }}</span></div>
+        {% endfor %}
+    </div>
+    <script>setTimeout(() => { document.querySelectorAll('.toast').forEach(t => t.remove()) }, 4000);</script>
+    {% endif %}
+
+</body>
+</html>

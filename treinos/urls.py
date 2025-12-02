@@ -1,0 +1,29 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.home, name='home'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('perfil/', views.perfil, name='perfil'),
+    path('criar_rotina/', views.criar_rotina, name='criar_rotina'),
+    path('criar_exercicio/', views.criar_exercicio, name='criar_exercicio'),
+    path('criar_metodo/', views.criar_metodo, name='criar_metodo'),
+    path('rotina/<int:id>/', views.detalhe_rotina, name='detalhe_rotina'),
+    path('iniciar/<int:rotina_id>/', views.iniciar_treino, name='iniciar_treino'),
+    path('treino/<int:treino_id>/', views.treino_em_andamento, name='treino_em_andamento'),
+    path('finalizar/<int:treino_id>/', views.finalizar_treino, name='finalizar_treino'),
+    path('cancelar/<int:treino_id>/', views.cancelar_treino, name='cancelar_treino'),
+    path('cadastro/', views.cadastro, name='cadastro'),
+    path('api/salvar_serie/', views.salvar_serie, name='salvar_serie'),
+    path('api/excluir_serie/<int:serie_id>/', views.excluir_serie, name='excluir_serie'),
+    path('api/salvar_anotacao/', views.salvar_anotacao, name='salvar_anotacao'),
+    path('api/grafico/<int:exercicio_id>/', views.api_dados_grafico, name='api_grafico'),
+    path('api/add_ex_treino/<int:treino_id>/<int:exercicio_id>/', views.api_adicionar_exercicio_treino, name='api_add_ex_treino'),
+    path('api/rem_ex_treino/<int:treino_id>/<int:exercicio_id>/', views.api_remover_exercicio_treino, name='api_rem_ex_treino'),
+    path('adicionar_peso/', views.adicionar_peso, name='adicionar_peso'),
+    path('registrar_medidas/', views.registrar_medidas, name='registrar_medidas'),
+    path('rotina/editar/<int:rotina_id>/', views.editar_rotina, name='editar_rotina'),
+    path('rotina/duplicar/<int:rotina_id>/', views.duplicar_rotina, name='duplicar_rotina'),
+    path('rotina/excluir/<int:rotina_id>/', views.excluir_rotina, name='excluir_rotina'),
+    path('estatisticas/', views.estatisticas, name='estatisticas'),
+]

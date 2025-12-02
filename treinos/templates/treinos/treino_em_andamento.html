@@ -1,0 +1,217 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Treino Ativo</title>
+    <link rel="stylesheet" href="{% static 'treinos/style.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'treinos/img/favicon.png' %}">
+    <style>
+        /* CSS DE SEGURANÇA (Garante que a lista não quebre mesmo se o style.css falhar) */
+        .saved-set {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.02);
+            box-sizing: border-box;
+        }
+        
+        /* Protege o texto para não empurrar o botão */
+        .saved-set-info {
+            display: flex; align-items: center; flex-grow: 1; 
+            overflow: hidden; margin-right: 10px;
+        }
+
+        /* Protege o botão de deletar para nunca encolher */
+        .btn-delete {
+            width: 40px; height: 40px; min-width: 40px; flex-shrink: 0;
+            background: transparent; border: none; color: #52525b;
+            border-radius: 50%; cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+        }
+        .btn-delete:hover { color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+
+        /* Labels dos inputs */
+        .input-label {
+            font-size: 0.7rem; color: var(--text-muted); 
+            font-weight: 700; display: block; 
+            margin-bottom: 6px; text-align: center; letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="{% url 'cancelar_treino' treino.id %}" 
+           onclick="return confirm('Deseja cancelar e excluir este treino?')"
+           style="color: #a1a1aa; display: flex; align-items: center; justify-content: center;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+        </a>
+
+        <div class="logo">Em <span>Execução</span></div>
+        
+        <div style="display: flex; justify-content: flex-end;">
+            <a href="{% url 'finalizar_treino' treino.id %}" style="color: var(--primary); font-weight: 700; text-decoration: none; border: 1px solid var(--primary); padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; box-shadow: 0 0 10px rgba(34,211,238,0.1);">
+                Concluir
+            </a>
+        </div>
+    </header>
+
+    <main style="padding-bottom: 140px;">
+        
+        <div style="margin-bottom: 25px; padding: 0 5px;">
+            <h2 style="color: #fff; font-size: 1.5rem; margin-bottom: 5px;">{{ treino.rotina.nome }}</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Iniciado às {{ treino.data|date:"H:i" }}</p>
+        </div>
+        
+        <div class="card-list">
+            {% for exercicio in exercicios %}
+            
+            <div class="card" style="display: flex; flex-direction: column; overflow: hidden; margin-bottom: 20px;">
+                
+                <div class="card-header">
+                    <div style="flex-grow: 1;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <h3 class="card-title">{{ exercicio.nome }}</h3>
+                            <button onclick="removerExercicioDoTreino({{ exercicio.id }})" style="background: none; border: none; color: #52525b; padding: 0;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; gap: 6px; margin-top: 8px; color: var(--text-muted); font-size: 0.85rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <span>{{ exercicio.ghost_set }}</span>
+                        </div>
+                    </div>
+                    <span class="badge" style="align-self: flex-start;">{{ exercicio.get_grupo_muscular_display }}</span>
+                </div>
+
+                <div style="padding: 0 24px 10px 24px; width: 100%;">
+                    <textarea 
+                        id="nota_{{ exercicio.id }}" 
+                        placeholder="Notas de ajuste..." 
+                        onblur="salvarNota({{ exercicio.id }})"
+                        rows="1"
+                        style="width: 100% !important; background: transparent !important; border: none !important; border-bottom: 1px solid var(--border) !important; border-radius: 0 !important; padding: 12px 0 !important; font-size: 0.95rem !important; color: var(--text-muted) !important; resize: none;"
+                        onfocus="this.style.borderColor='var(--primary) !important'; this.style.color='#fff !important';"
+                    >{{ exercicio.nota_pessoal }}</textarea>
+                    <span id="status_nota_{{ exercicio.id }}" style="font-size: 0.7rem; color: var(--success); display: none;">Salvo</span>
+                </div>
+
+                <div id="lista_series_{{ exercicio.id }}" style="width: 100%;">
+                    {% for exercicio_id, series in series_por_exercicio.items %}
+                        {% if exercicio_id == exercicio.id %}
+                            {% for serie in series %}
+                                <div class="saved-set" id="linha_serie_{{ serie.id }}">
+                                    <div class="saved-set-info">
+                                        <span class="saved-method" style="color: {{ serie.metodo.cor }}; border: 1px solid {{ serie.metodo.cor }}; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; margin-right: 12px; white-space: nowrap;">
+                                            {{ serie.metodo.sigla }}
+                                        </span>
+                                        <span style="color: #fff; font-weight: 600; font-size: 1rem;">
+                                            {{ serie.peso }}kg <span style="color:var(--text-muted); margin:0 5px; font-weight:400;">x</span> {{ serie.repeticoes }}
+                                        </span>
+                                    </div>
+                                    <button class="btn-delete" onclick="excluirSerie({{ serie.id }})">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 70px 1fr 1fr 55px; gap: 12px; padding: 20px 24px; align-items: end; background: rgba(0,0,0,0.2); border-top: 1px solid var(--border); width: 100%;">
+                    <div>
+                        <label class="input-label">TIPO</label>
+                        <select id="tipo_{{ exercicio.id }}" onchange="atualizarCorSelect(this)" style="padding: 0 !important; height: 50px !important; text-align: center; font-weight: 700; cursor: pointer;">
+                            {% for metodo in metodos %}
+                                <option value="{{ metodo.id }}" data-cor="{{ metodo.cor }}">{{ metodo.sigla }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="input-label">KG</label>
+                        <input type="number" id="peso_{{ exercicio.id }}" placeholder="0" style="height: 50px !important; text-align: center; font-size: 1.2rem !important; font-weight: 700;">
+                    </div>
+                    <div>
+                        <label class="input-label">REPS</label>
+                        <input type="number" id="reps_{{ exercicio.id }}" placeholder="0" style="height: 50px !important; text-align: center; font-size: 1.2rem !important; font-weight: 700;">
+                    </div>
+                    <div>
+                        <button onclick="salvarSerie({{ treino.id }}, {{ exercicio.id }})" id="btn_{{ exercicio.id }}" style="width: 100%; height: 50px; border-radius: 14px; background: var(--primary); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px var(--primary-glow);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#000" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+
+        <button onclick="abrirModalExercicios()" style="width: 100%; padding: 16px; background: rgba(34, 211, 238, 0.05); border: 1px dashed var(--primary); color: var(--primary); border-radius: 16px; margin-top: 25px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+            Adicionar Exercício ao Treino
+        </button>
+
+    </main>
+
+    <div id="modalExercicios" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; padding: 20px; backdrop-filter: blur(5px);">
+        <div style="background: #18181b; height: 100%; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column; border: 1px solid var(--border); box-shadow: 0 0 50px rgba(0,0,0,0.8);">
+            
+            <div style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: white; margin: 0; font-size: 1.1rem;">Escolher Exercício</h3>
+                <button onclick="fecharModalExercicios()" style="background: none; border: none; color: #a1a1aa; font-size: 2rem; line-height: 1;">&times;</button>
+            </div>
+
+            <div style="padding: 10px 20px; border-bottom: 1px solid var(--border); background: #121214;">
+                <input type="text" id="inputBuscaExercicios" onkeyup="filtrarExercicios()" placeholder="🔍 Buscar exercício..." 
+                       style="width: 100%; padding: 12px; border-radius: 12px; background: #000; border: 1px solid #333; color: white; font-size: 1rem;">
+            </div>
+
+            <div style="padding: 15px; border-bottom: 1px solid var(--border); text-align: center; background: rgba(34, 211, 238, 0.05);">
+                <a href="{% url 'criar_exercicio' %}?treino_id={{ treino.id }}" 
+                   style="display: block; width: 100%; padding: 12px; background: var(--primary); color: #000; border-radius: 12px; font-weight: 800; text-decoration: none; text-transform: uppercase; letter-spacing: 0.5px;">
+                    + Criar Novo Exercício
+                </a>
+            </div>
+            
+            <div id="listaExerciciosModal" style="overflow-y: auto; padding: 0;">
+                {% for ex_opcao in todos_exercicios %}
+                    <div class="item-exercicio" onclick="adicionarExercicio({{ ex_opcao.id }})" style="padding: 20px; border-bottom: 1px solid var(--border); color: white; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 600;">{{ ex_opcao.nome }}</span>
+                        <span style="color: #52525b; font-size: 0.75rem; border: 1px solid #333; padding: 4px 8px; border-radius: 6px;">{{ ex_opcao.get_grupo_muscular_display }}</span>
+                    </div>
+                {% empty %}
+                    <p style="text-align: center; padding: 40px; color: var(--text-muted);">Nenhum exercício encontrado.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div id="restTimer" class="rest-timer-container">
+        <div class="progress-bar-bg">
+            <div id="timerProgress" class="progress-bar-fill"></div>
+        </div>
+        <div class="timer-controls">
+            <button class="timer-btn" onclick="ajustarTempo(-10)">-10</button>
+            <div style="text-align: center;">
+                <div style="font-size: 0.7rem; color: #71717a; text-transform: uppercase; letter-spacing: 1px;">Descanso</div>
+                <div id="timerDisplay" class="timer-time">01:30</div>
+            </div>
+            <button class="timer-btn" onclick="ajustarTempo(10)">+10</button>
+            <button class="timer-btn" style="background: rgba(239, 68, 68, 0.2); color: #ef4444; border-color: #ef4444; margin-left: 10px;" onclick="pararCronometro()">&times;</button>
+        </div>
+    </div>
+
+    <script>
+        const GLOBAL_TREINO_ID = {{ treino.id }};
+    </script>
+
+    <script src="{% static 'treinos/execucao.js' %}?v=4"></script> </body>
+</html>

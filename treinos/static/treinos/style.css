@@ -1,0 +1,597 @@
+
+/* 1. IMPORTAÇÃO DE FONTE (INTER) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* 2. VARIÁVEIS GLOBAIS (PALETA) */
+:root {
+    /* Cores de Fundo (Camadas de Profundidade) */
+    --bg-app: #050505;  
+    --bg-panel: #121214;   
+    --bg-input: #18181b;   
+    
+    /* Cores de Destaque (Brand Colors) */
+    --primary: #22d3ee;           
+    --primary-hover: #06b6d4;   
+    --primary-glow: rgba(34, 211, 238, 0.25);
+    
+    /* Cores Semânticas */
+    --success: #22c55e;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    
+    /* Tipografia e Bordas */
+    --text-main: #f4f4f5;   
+    --text-muted: #71717a;  
+    --border: #27272a;       
+    
+    /* Dimensões */
+    --radius: 16px;        
+    --header-height: 70px;
+}
+
+/* 3. RESET & BASE */
+* {
+    margin: 0; padding: 0; box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: var(--bg-app);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    padding-bottom: 120px; 
+    overflow-x: hidden; 
+}
+
+/* --- AMBIENT LIGHT (O BRILHO DE FUNDO) --- */
+body::before {
+    content: '';
+    position: fixed;
+    top: -10%; left: -20%;
+    width: 80vw; height: 80vw;
+    background: radial-gradient(circle, rgba(34, 211, 238, 0.12), transparent 70%);
+    z-index: -1;
+    pointer-events: none;
+    animation: floatLight 10s infinite alternate ease-in-out;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    bottom: -10%; right: -20%;
+    width: 70vw; height: 70vw;
+    background: radial-gradient(circle, rgba(168, 85, 247, 0.08), transparent 70%); 
+    z-index: -1;
+    pointer-events: none;
+    animation: floatLight 15s infinite alternate-reverse ease-in-out;
+}
+
+@keyframes floatLight {
+    from { transform: translate(0, 0); }
+    to { transform: translate(20px, 20px); }
+}
+
+a { text-decoration: none; color: inherit; transition: opacity 0.2s; }
+ul { list-style: none; }
+
+/* 4. TIPOGRAFIA & LOGO */
+h1, h2, h3 { font-weight: 700; letter-spacing: -0.02em; }
+
+.logo {
+    font-size: 1.1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-main);
+}
+.logo span { color: var(--primary); text-shadow: 0 0 15px var(--primary-glow); }
+
+/* 5. CABEÇALHO (HEADER) - EFEITO VIDRO */
+header {
+    background: rgba(5, 5, 5, 0.85); 
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    height: 60px; 
+    display: grid; 
+    grid-template-columns: 40px 1fr 40px; 
+    align-items: center;
+    padding: 0 15px;
+    position: sticky; top: 0; z-index: 100;
+}
+
+header .logo, header h1 {
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 1rem; 
+    margin: 0;
+}
+
+/* 6. CONTAINERS E CARDS */
+main {
+    max-width: 600px; 
+    margin: 0 auto;
+    padding: 20px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.card-list { display: flex; flex-direction: column; gap: 15px; }
+
+.card {
+    background: rgba(18, 18, 20, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    
+    border-radius: var(--radius);
+    
+    /* AQUI ESTÁ A CORREÇÃO: */
+    overflow: visible !important; /* Liberta o menu */
+    
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 1; /* Nível base */
+}
+
+.card:hover {
+    border-color: rgba(34, 211, 238, 0.3); 
+    box-shadow: 0 8px 32px 0 rgba(34, 211, 238, 0.1);
+}
+
+.card:active { transform: scale(0.99); } 
+
+.card-header {
+    padding: 20px 24px; 
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: flex-start; 
+    gap: 15px; 
+}
+
+.card-title { 
+    font-size: 1.2rem; 
+    color: #fff; 
+    line-height: 1.4; 
+    font-weight: 600;
+}
+
+.badge {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 6px 12px; 
+    border-radius: 8px; 
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--primary); 
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    align-self: flex-start; 
+}
+
+.card p {
+    margin-top: 5px;
+    color: var(--text-muted);
+    font-size: 0.95rem; 
+    padding: 0 24px 20px 24px; 
+}
+
+/* 7. INPUTS E FORMULÁRIOS (TOUCH FRIENDLY PRO) */
+
+/* Estilo Base para todos os campos */
+input, select, textarea {
+    width: 100%;
+    background-color: var(--bg-input) !important;
+    border: 1px solid var(--border) !important;
+    color: #fff !important;
+    padding: 16px !important; 
+    border-radius: 16px !important; 
+    font-size: 16px !important; 
+    font-family: 'Inter', sans-serif !important; 
+    outline: none;
+    transition: all 0.2s ease-in-out;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Estado de Foco (Quando clica) */
+input:focus, select:focus, textarea:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 4px var(--primary-glow) !important;
+    background-color: #202024 !important; 
+    transform: translateY(-1px);
+}
+
+/* Placeholder (Texto de dica) */
+::placeholder {
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+/* --- REMOVER SETINHAS DE NÚMERO (SPINNERS) --- */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+}
+input[type=number] {
+    appearance: textfield;
+    -moz-appearance: textfield; 
+}
+
+/* --- ESTILO ESPECIAL PARA DROPDOWN (SELECT) --- */
+/* Como tiramos o appearance:none, a seta sumiu. Vamos recriar ela com SVG */
+select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2371717a'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 20px;
+    padding-right: 40px !important; 
+}
+
+select:focus {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2322d3ee'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+}
+
+/* Input com erro (Opcional, para validação) */
+input.error {
+    border-color: var(--danger) !important;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* 8. BOTÕES (NEON) */
+button, .btn-full {
+    border: none; outline: none; cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+}
+
+.btn-full {
+    display: block; width: 100%;
+    background: var(--primary);
+    color: #000;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 16px;
+    border-radius: 12px;
+    margin-top: 15px;
+    text-align: center;
+    box-shadow: 0 0 15px var(--primary-glow);
+}
+
+.btn-full:active { transform: scale(0.98); box-shadow: none; }
+
+/* Botão Flutuante (FAB) */
+.fab {
+    position: fixed; bottom: 25px; right: 25px;
+    width: 60px; height: 60px;
+    background: var(--primary);
+    color: #000;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 5px 20px var(--primary-glow);
+    z-index: 90;
+    transition: transform 0.2s;
+}
+.fab:active { transform: scale(0.9); }
+.fab svg { width: 28px; height: 28px; stroke-width: 2.5; }
+
+/* 9. TELA DE LOGIN/CADASTRO (AUTH) */
+.auth-container {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    padding: 20px;
+    background: radial-gradient(circle at top, #18181b 0%, #000 100%);
+}
+
+.auth-card {
+    background: var(--bg-panel);
+    width: 100%; max-width: 400px;
+    padding: 40px 30px;
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+}
+
+.auth-link {
+    display: block; text-align: center; margin-top: 25px;
+    color: var(--text-muted); font-size: 0.9rem;
+}
+.auth-link span { color: var(--primary); font-weight: 600; }
+
+/* 10. NOTIFICAÇÕES (TOASTS) */
+.toast-container {
+    position: fixed; top: 20px; right: 20px; z-index: 2000;
+    display: flex; flex-direction: column; gap: 10px;
+}
+
+.toast {
+    background: rgba(18, 18, 20, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--primary);
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: #fff;
+    min-width: 300px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.toast.success { border-left-color: var(--success); }
+.toast.error { border-left-color: var(--danger); }
+.toast.gold { border-left-color: #fbbf24; background: linear-gradient(to right, #121214, #2a2008); }
+
+/* 11. CRONÔMETRO (REST TIMER) */
+.rest-timer-container {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    background: #121214;
+    border-top: 1px solid var(--border);
+    padding: 20px;
+    border-radius: 20px 20px 0 0;
+    z-index: 1000;
+    transform: translateY(110%);
+    transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+}
+.rest-timer-container.active { transform: translateY(0); }
+
+.progress-bar-bg {
+    position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+    background: #27272a;
+}
+.progress-bar-fill {
+    height: 100%; width: 100%; background: var(--primary);
+    box-shadow: 0 0 10px var(--primary); transition: width 1s linear;
+}
+
+.timer-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.timer-time { font-size: 2rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.timer-btn {
+    width: 50px; height: 50px; border-radius: 50%;
+    background: var(--bg-input); border: 1px solid var(--border);
+    color: #fff; font-weight: 600; display: flex; align-items: center; justify-content: center;
+}
+
+/* ANIMAÇÕES GERAIS */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
+
+/* --- BARRA DE NAVEGAÇÃO (TAB BAR) --- */
+.bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; width: 100%;
+    height: 80px; 
+    background: rgba(5, 5, 5, 0.95); 
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding-bottom: 15px; 
+    z-index: 100; 
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #71717a; 
+    font-size: 0.7rem;
+    font-weight: 600;
+    width: 100%;
+    height: 100%;
+    transition: color 0.2s;
+}
+
+.nav-item svg {
+    width: 24px; height: 24px;
+    margin-bottom: 4px;
+    stroke-width: 2;
+    transition: all 0.2s;
+}
+
+/* Estado Ativo (Quando você está na página) */
+.nav-item.active {
+    color: var(--primary);
+}
+
+.nav-item.active svg {
+    stroke: var(--primary);
+    filter: drop-shadow(0 0 8px var(--primary-glow));
+    transform: translateY(-2px);
+}
+
+/* Efeito de clique */
+.nav-item:active { transform: scale(0.9); }
+
+/* --- ANIMAÇÕES AVANÇADAS (UX ENHANCEMENTS) --- */
+.card-list .card {
+    opacity: 0;
+    animation: fadeInUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.saved-set {
+    opacity: 1; 
+}
+
+/* O Segredo: Atraso progressivo para cada item */
+.card-list .card:nth-child(1) { animation-delay: 0.05s; }
+.card-list .card:nth-child(2) { animation-delay: 0.1s; }
+.card-list .card:nth-child(3) { animation-delay: 0.15s; }
+.card-list .card:nth-child(4) { animation-delay: 0.2s; }
+.card-list .card:nth-child(5) { animation-delay: 0.25s; }
+
+
+@keyframes fadeInUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px) scale(0.95); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+    }
+}
+
+/* 2. FEEDBACK TÁTIL EXTREMO (SQUISH) */
+/* Quando clica, o elemento 'afunda' gostoso */
+button:active, 
+.btn-full:active, 
+.nav-item:active, 
+.card:active,
+.fab:active {
+    transform: scale(0.96) !important; 
+    transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 3. BOTÃO PULSANTE (CHAMAR ATENÇÃO) */
+/* Use a classe .pulse-glow em botões críticos */
+.pulse-glow {
+    position: relative;
+    overflow: hidden;
+}
+
+.pulse-glow::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    border-radius: inherit;
+    box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7);
+    animation: pulse-cyan 2s infinite;
+}
+
+@keyframes pulse-cyan {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(34, 211, 238, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
+}
+
+/* 4. LOADING SPINNER (RODINHA DE CARREGAMENTO) */
+/* Vamos deixar o loading do gráfico mais bonito */
+.loading-spinner {
+    width: 40px; height: 40px;
+    border: 3px solid rgba(34, 211, 238, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--primary);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+
+/* --- ESCONDER BARRA DE ROLAGEM (NATIVE FEEL) --- */
+/* Para Chrome, Safari e Edge */
+::-webkit-scrollbar {
+    width: 0px;
+    background: transparent; 
+}
+
+* {
+    scrollbar-width: none;
+}
+
+/* --- MENU DE OPÇÕES (3 PONTOS) --- */
+.options-btn {
+    background: none; border: none; color: #a1a1aa;
+    padding: 5px; cursor: pointer; border-radius: 50%;
+    transition: all 0.2s; z-index: 10;
+}
+.options-btn:hover, .options-btn:active {
+    background: rgba(255,255,255,0.1); color: #fff;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 40px; right: 10px;
+    background: #18181b;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    width: 180px;
+    display: none; /* Escondido por padrão */
+    z-index: 999;
+    overflow: hidden;
+    animation: fadeIn 0.2s ease;
+}
+
+.dropdown-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 15px;
+    color: #e4e4e7;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.dropdown-item:last-child { border-bottom: none; }
+.dropdown-item:hover { background: rgba(255,255,255,0.05); }
+
+/* Cor vermelha para deletar */
+.text-danger { color: #ef4444; }
+.text-danger:hover { background: rgba(239, 68, 68, 0.1); }
+
+/* =========================================
+   CORREÇÃO DEFINITIVA: LISTA DE SÉRIES
+   ========================================= */
+
+.saved-set {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 16px; /* Espaçamento interno seguro */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.02);
+    box-sizing: border-box; /* Garante que o padding não estoure a tela */
+    animation: fadeIn 0.3s ease;
+}
+
+.saved-set-info {
+    display: flex;
+    align-items: center;
+    flex-grow: 1; /* Ocupa todo o espaço disponível */
+    overflow: hidden; /* Se o texto for gigante, corta */
+    margin-right: 10px; /* Distância do botão de deletar */
+}
+
+.btn-delete {
+    /* DIMENSÕES FIXAS (O Segredo) */
+    width: 40px; 
+    height: 40px;
+    min-width: 40px; /* Nunca deixa ficar menor que 40px */
+    
+    /* Visual */
+    background: transparent;
+    border: none;
+    color: #71717a;
+    border-radius: 50%;
+    cursor: pointer;
+    
+    /* Centralizar o ícone */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* Comportamento Flex */
+    flex-shrink: 0; /* PROIBIDO ENCOLHER */
+}
+
+.btn-delete:hover {
+    color: #ef4444; /* Vermelho */
+    background: rgba(239, 68, 68, 0.1);
+}

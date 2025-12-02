@@ -1,0 +1,130 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App do Juan Borges Dev</title>
+    <link rel="stylesheet" href="{% static 'treinos/style.css' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'treinos/img/favicon.png' %}">
+</head>
+<body>
+
+    <header>
+        <div></div>
+
+        <div class="logo">Juan Borges <span>Dev</span></div>
+        
+        <div></div> 
+    </header>
+
+    <main style="padding-bottom: 100px;"> <a href="{% url 'dashboard' %}" style="display: block; margin: 20px 0; background: #121214; border: 1px solid #27272a; padding: 15px; border-radius: 16px; text-decoration: none; color: white; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px; color: var(--primary);">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" />
+                </svg>
+                <span style="font-weight: 700; font-size: 1rem;">Ver minha Evolução</span>
+            </div>
+            <span style="color: #71717a;">→</span>
+        </a>
+
+        <h2 style="font-size: 0.9rem; color: #71717a; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Minhas Rotinas</h2>
+
+        <div class="card-list">
+            {% for rotina in rotinas %}
+            <div class="card" style="position: relative; transition: transform 0.2s;">
+                
+                <a href="{% url 'detalhe_rotina' rotina.id %}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"></a>
+
+                <div id="menu_{{ rotina.id }}" class="dropdown-menu" style="z-index: 20;">
+                    <a href="{% url 'duplicar_rotina' rotina.id %}" class="dropdown-item" style="position: relative; z-index: 21;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                        Duplicar Rotina
+                    </a>
+                    <a href="{% url 'editar_rotina' rotina.id %}" class="dropdown-item" style="position: relative; z-index: 21;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                        Editar Rotina
+                    </a>
+                    <a href="{% url 'excluir_rotina' rotina.id %}" class="dropdown-item text-danger" style="position: relative; z-index: 21;" onclick="return confirm('Tem certeza que deseja apagar {{ rotina.nome }}?')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        Deletar Rotina
+                    </a>
+                </div>
+
+                <div class="card-header" style="padding-right: 10px;">
+                    <div style="flex-grow: 1;">
+                        <h3 class="card-title" style="margin-bottom: 12px;">{{ rotina.nome }}</h3>
+                        
+                        <span class="badge">{{ rotina.exercicios.count }} Exercícios</span>
+                    </div>
+                    
+                    <button class="options-btn" style="position: relative; z-index: 10;" onclick="toggleMenu(event, 'menu_{{ rotina.id }}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div style="padding: 15px; color: #a1a1aa; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    {% for exercicio in rotina.exercicios.all|slice:":3" %}
+                        {{ exercicio.nome }} • 
+                    {% endfor %}
+                </div>
+            </div>
+            {% empty %}
+            <div style="text-align: center; padding: 40px; color: #52525b;">
+                <p>Nenhuma rotina encontrada.</p>
+                <p style="font-size: 0.9rem;">Toque em "Criar" abaixo.</p>
+            </div>
+            {% endfor %}
+        </div>
+
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="{% url 'home' %}" class="nav-item active">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
+            <span>Início</span>
+        </a>
+
+        <a href="{% url 'criar_rotina' %}" class="nav-item">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+            <span>Criar</span>
+        </a>
+
+        <a href="{% url 'dashboard' %}" class="nav-item">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" /></svg>
+            <span>Evolução</span>
+        </a>
+
+        <a href="{% url 'perfil' %}" class="nav-item">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+            <span>Perfil</span>
+        </a>
+    </nav>
+
+    {% if messages %}
+    <div class="toast-container">
+        {% for message in messages %}
+        <div class="toast {{ message.tags }}">
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.style.display='none'" style="background:none; border:none; color:#71717a; cursor:pointer; font-size:1.2rem; margin-left:10px;">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        setTimeout(() => {
+            const toasts = document.querySelectorAll('.toast');
+            toasts.forEach(t => {
+                t.style.animation = 'fadeOut 0.5s forwards';
+                setTimeout(() => t.remove(), 500);
+            });
+        }, 4000);
+    </script>
+    {% endif %}
+
+   <script src="{% static 'treinos/home.js' %}"></script>
+
+</body>
+</html>

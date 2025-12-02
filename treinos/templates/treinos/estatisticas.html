@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Estatísticas</title>
+    <link rel="stylesheet" href="{% static 'treinos/style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header>
+        <a href="{% url 'perfil' %}" style="color: #a1a1aa; display: flex; align-items: center; justify-content: center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+        </a>
+        <div class="logo">Sets por <span>Grupo</span></div>
+        <div></div>
+    </header>
+
+    <main>
+        
+        <div class="card" style="padding: 20px; margin-bottom: 20px; height: 400px; display: flex; align-items: center; justify-content: center; position: relative;">
+            {% if data %}
+                <canvas id="muscleChart"></canvas>
+            {% else %}
+                <div style="text-align: center; color: #52525b;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="margin-bottom: 10px; opacity: 0.5;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
+                    </svg>
+                    <p>Treine mais para ver o gráfico!</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <h3 style="color: #71717a; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 15px; padding-left: 5px;">Ranking de Volume</h3>
+        
+        <div class="card-list">
+            {% for label in labels %}
+                {% endfor %}
+            
+            <div style="text-align: center; color: #52525b; font-size: 0.8rem; margin-top: 20px;">
+                *Baseado no total de séries realizadas.
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const CHART_LABELS = {{ labels|safe }};
+        const CHART_DATA = {{ data|safe }};
+    </script>
+
+    <script src="{% static 'treinos/estatisticas.js' %}"></script>
+
+</body>
+</html>
