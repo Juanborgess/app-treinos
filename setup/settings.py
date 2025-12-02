@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+import dj_database_url
 
 load_dotenv()
 
@@ -78,6 +79,7 @@ WSGI_APPLICATION = 'setup.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Configuração de Banco de Dados Híbrida
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -88,6 +90,10 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT'),
     }
 }
+
+# Se existir a variável DATABASE_URL (no Render), ela sobrescreve a configuração acima
+if os.getenv('DATABASE_URL'):
+    DATABASES['default'] = dj_database_url.config(default=os.getenv('DATABASE_URL'))
 
 
 # Password validation
