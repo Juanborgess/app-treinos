@@ -159,3 +159,7 @@ LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'login'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+BASE_URL = 'https://app-do-juan.onrender.com'
