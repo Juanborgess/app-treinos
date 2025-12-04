@@ -12,19 +12,17 @@ urlpatterns = [
 
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     
-    # --- 2. ROTAS DE RESET DE SENHA (USANDO O CAMINHO COMPLETO E FUNCIONAL) ---
-    # Nota: Este caminho exige que os templates estejam em treinos/templates/treinos/registration
-    path('password_reset/', auth_views.PasswordResetView.as_view(
-        template_name='treinos/registration/password_reset_form.html'), name='password_reset'),
+   path('password_reset/', auth_views.PasswordResetView.as_view(
+        template_name='registration/password_reset_form.html'), name='password_reset'),
     
     path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(
-        template_name='treinos/registration/password_reset_done.html'), name='password_reset_done'),
+        template_name='registration/password_reset_done.html'), name='password_reset_done'),
     
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
-        template_name='treinos/registration/password_reset_confirm.html'), name='password_reset_confirm'),
+        template_name='registration/password_reset_confirm.html'), name='password_reset_confirm'),
     
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(
-        template_name='treinos/registration/password_reset_complete.html'), name='password_reset_complete'),
+        template_name='registration/password_reset_complete.html'), name='password_reset_complete'),
     
     # --- 3. ROTAS PRINCIPAIS DO APP (A ORDEM FINAL) ---
     path('admin/', admin.site.urls), 
