@@ -50,7 +50,7 @@ class SerieRealizada(models.Model):
     treino = models.ForeignKey(TreinoRealizado, on_delete=models.CASCADE)
     exercicio = models.ForeignKey(Exercicio, on_delete=models.CASCADE)
     metodo = models.ForeignKey(Metodo, on_delete=models.SET_NULL, null=True)
-    peso = models.IntegerField(validators=[MinValueValidator(1)])
+    peso = models.DecimalField(max_digits=6, decimal_places=2, validators=[MinValueValidator(0.1)])
     repeticoes = models.IntegerField(validators=[MinValueValidator(1)])
     
     def __str__(self):

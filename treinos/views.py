@@ -238,7 +238,7 @@ def salvar_serie(request):
         dados = json.loads(request.body)
         
         exercicio_id = dados['exercicio_id']
-        peso_novo = int(dados['peso'])
+        peso_novo = float(dados['peso'])
         
         # 1. BUSCAR RECORDE ANTIGO
         recorde_atual = SerieRealizada.objects.filter(
