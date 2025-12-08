@@ -6,10 +6,33 @@ from django.utils import timezone
 # 1. EXERCÍCIOS
 class Exercicio(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    
     GRUPOS = [
-        ('PEITO', 'Peito'), ('COSTAS', 'Costas'), ('PERNAS', 'Pernas'),
-        ('OMBROS', 'Ombros'), ('BRACOS', 'Braços'), ('ABS', 'Abdômen'),
+        # Superiores - Empurrar
+        ('PEITO', 'Peitoral'),
+        ('OMBRO_ANT', 'Deltoide Anterior'),
+        ('OMBRO_LAT', 'Deltoide Lateral'),
+        ('OMBRO_POST', 'Deltoide Posterior'),
+        ('TRICEPS', 'Tríceps'),
+        
+        # Superiores - Puxar
+        ('COSTAS', 'Dorsais'),
+        ('TRAPEZIO', 'Trapézio'),
+        ('BICEPS', 'Bíceps'),
+        ('ANTEBRACO', 'Antebraço'),
+        
+        # Inferiores
+        ('QUADRICEPS', 'Quadríceps'),
+        ('POSTERIOR', 'Posterior de Coxa'),
+        ('GLUTEOS', 'Glúteos'),
+        ('PANTURRILHA', 'Panturrilhas'),
+        
+        # Core / Outros
+        ('ABS', 'Abdômen'),
+        ('LOMBAR', 'Lombar'),
+        ('CARDIO', 'Cardio'),
     ]
+    
     nome = models.CharField(max_length=100)
     grupo_muscular = models.CharField(max_length=20, choices=GRUPOS)
     
