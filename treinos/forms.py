@@ -1,6 +1,13 @@
 from django import forms
 from django.db.models import Q 
 from .models import Rotina, Exercicio, Metodo
+from django.contrib.auth.forms import UserCreationForm
+
+
+class CustomUserCreationForm(UserCreationForm):
+    email = forms.EmailField(required=True, label="Email (Obrigatório para recuperação)")
+    class Meta(UserCreationForm.Meta):
+        fields = UserCreationForm.Meta.fields + ('email',)
 
 class RotinaForm(forms.ModelForm):
     class Meta:

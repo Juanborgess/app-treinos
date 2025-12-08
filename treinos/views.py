@@ -8,34 +8,27 @@ from django.contrib import messages
 from django.db.models import Q, Sum, F, Max
 from django.db.models import Count
 
-# IMPORTANDO TODOS OS MODELOS (Incluindo MedidaCorporal)
 from .models import (
     Rotina, TreinoRealizado, Exercicio, SerieRealizada, 
     Metodo, Anotacao, PesoUsuario, MedidaCorporal
 )
-from .forms import RotinaForm, ExercicioForm, MetodoForm
-
-# ============================================================================
-# 1. AUTENTICAÇÃO
-# ============================================================================
+from .forms import RotinaForm, ExercicioForm, MetodoForm, CustomUserCreationForm
 
 def cadastro(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        # USAMOS O NOVO FORMULÁRIO SEGURO
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
             messages.success(request, f"Bem-vindo à elite, {user.username}!")
             return redirect('home')
         else:
-            messages.error(request, "Erro no cadastro. Verifique a senha.")
+            messages.error(request, "Erro ao criar conta. Verifique os dados.")
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm() # USAMOS O NOVO FORMULÁRIO SEGURO
+    
     return render(request, 'treinos/cadastro.html', {'form': form})
-
-# ============================================================================
-# 2. DASHBOARD, PERFIL E MEDIÇÕES (AQUI ESTÁ A NOVIDADE)
-# ============================================================================
 
 @login_required(login_url='/login/')
 def home(request):
