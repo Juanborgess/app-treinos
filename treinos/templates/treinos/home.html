@@ -16,6 +16,8 @@
         <div class="logo">Juan Borges <span>Dev</span></div>
         
         <div></div> 
+    {% load pwa %}
+    {% progressive_web_app_meta %}
     </header>
 
     <main style="padding-bottom: 100px;"> <a href="{% url 'dashboard' %}" style="display: block; margin: 20px 0; background: #121214; border: 1px solid #27272a; padding: 15px; border-radius: 16px; text-decoration: none; color: white; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">

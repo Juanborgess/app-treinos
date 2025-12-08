@@ -26,5 +26,7 @@ urlpatterns = [
     
     # --- 3. ROTAS PRINCIPAIS DO APP (A ORDEM FINAL) ---
     path('admin/', admin.site.urls), 
-    path('', include('treinos.urls')), 
+    path('', include('treinos.urls')),
+    
+    path('', include('pwa.urls')),
 ]

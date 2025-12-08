@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'treinos',
+    'pwa',
 ]
 
 MIDDLEWARE = [
@@ -68,7 +69,7 @@ ROOT_URLCONF = 'setup.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -163,3 +164,24 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 BASE_URL = 'https://app-do-juan.onrender.com'
+
+# CONFIGURAÇÃO PWA (APP INSTALÁVEL)
+PWA_APP_NAME = 'Juan Treinos'
+PWA_APP_DESCRIPTION = "O melhor tracker de treinos do mundo"
+PWA_THEME_COLOR = '#000000'
+PWA_BACKGROUND_COLOR = '#000000'
+PWA_DISPLAY = 'standalone'
+PWA_SCOPE = '/'
+PWA_START_URL = '/'
+
+
+PWA_APP_ICONS = [
+    {
+        'src': '/static/treinos/img/favicon.png',
+        'sizes': '160x160',
+        'type': 'image/png' 
+    }
+]
+
+
+PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'staticfiles', 'serviceworker.js')
