@@ -6,6 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ rotina.nome }}</title>
     <link rel="stylesheet" href="{% static 'treinos/style.css' %}">
+    
+    <style>
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .btn-icon {
+            background: none; border: none; cursor: pointer; padding: 8px;
+            color: #00ff88; transition: transform 0.2s;
+        }
+        .btn-icon:active { transform: scale(0.9); }
+    </style>
 </head>
 <body>
 
@@ -15,33 +27,92 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>
         </a>
-
         <div class="logo" style="color: #fff;">{{ rotina.nome }}</div>
-        
         <div style="width: 24px;"></div> 
     </header>
 
     <main>
         <h2 style="margin-top: 10px;">Exercícios</h2>
 
-        <div class="card-list">
-            {% for exercicio in rotina.exercicios.all %}
-            <div class="card" style="cursor: default;"> <div class="card-header">
-                    <h3 class="card-title">{{ exercicio.nome }}</h3>
-                    <span class="badge">{{ exercicio.get_grupo_muscular_display }}</span>
+        <div class="card-list" 
+             id="lista-exercicios" 
+             data-url="{% url 'reordenar_rotina' rotina.id %}"
+             data-csrf="{{ csrf_token }}">
+
+            {% for exercicio in exercicios %}
+            <div class="card item-exercicio" data-id="{{ exercicio.id }}" style="cursor: default; position: relative; margin-bottom: 15px;"> 
+                
+                <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
+                    
+                    <div style="display: flex; align-items: center; flex-grow: 1;">
+                        <div class="handle" style="cursor: grab; padding-right: 15px; color: var(--text-muted, #888); display: flex; align-items: center;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="card-title" style="margin: 0;">{{ exercicio.nome }}</h3>
+                            <span class="badge">{{ exercicio.get_grupo_muscular_display }}</span>
+                        </div>
+                    </div>
+
+                    <button class="btn-icon" onclick="abrirModalTroca('{{ exercicio.id }}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 19l-3 3-3-3m3 3V8a2 2 0 0 1 2-2h8m-3-11l3-3 3 3m-3-3v14a2 2 0 0 1-2 2H8"/>
+                        </svg>
+                    </button>
+
                 </div>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">
+                
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px; padding-left: 40px;">
                     4 Séries planejadas
                 </p>
             </div>
+            {% empty %}
+                 <p class="text-muted" style="text-align: center; margin-top: 20px;">Nenhum exercício cadastrado.</p>
             {% endfor %}
         </div>
 
-       <a href="{% url 'iniciar_treino' rotina.id %}" class="fab pulse-glow" style="width: 100%; border-radius: 12px; bottom: 20px; right: 0; position: relative; margin-top: 30px; font-weight: bold; font-size: 1.1rem; color: #000; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+        <div style="height: 80px;"></div>
+
+        <a href="{% url 'iniciar_treino' rotina.id %}" class="fab pulse-glow" style="width: 100%; border-radius: 12px; bottom: 20px; right: 0; position: relative; font-weight: bold; font-size: 1.1rem; color: #000; text-decoration: none; display: flex; align-items: center; justify-content: center;">
             INICIAR TREINO
         </a>
 
     </main>
+
+    <div id="modal-troca" 
+         data-url="{% url 'substituir_exercicio' rotina.id %}"
+         data-csrf="{{ csrf_token }}"
+         style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: flex-end;">
+        
+        <div style="background: #1a1a1a; width: 100%; max-height: 80vh; border-radius: 20px 20px 0 0; padding: 20px; display: flex; flex-direction: column; animation: slideUp 0.3s ease-out; border-top: 1px solid #333;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #333;">
+                <h3 style="color: white; margin: 0; font-size: 1.2rem;">Substituir por...</h3>
+                <button onclick="fecharModal()" style="background: none; border: none; color: #666; font-size: 2rem; line-height: 1;">&times;</button>
+            </div>
+
+            <div style="overflow-y: auto; flex-grow: 1;">
+                {% for op in outros_exercicios %}
+                <div onclick="confirmarTroca('{{ op.id }}')" 
+                     style="padding: 15px 0; border-bottom: 1px solid #2a2a2a; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="color: white; font-weight: 500;">{{ op.nome }}</div>
+                        <small style="color: #888;">{{ op.get_grupo_muscular_display }}</small>
+                    </div>
+                    <div style="color: #00ff88; font-weight: bold; font-size: 0.9rem;">ESCOLHER</div>
+                </div>
+                {% empty %}
+                    <p style="color: #666; text-align: center; padding: 20px;">Sem outras opções disponíveis.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="{% static 'treinos/reordenar.js' %}"></script>
+    <script src="{% static 'treinos/substituir.js' %}"></script>
 
 </body>
 </html>

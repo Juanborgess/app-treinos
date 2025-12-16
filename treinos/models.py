@@ -55,6 +55,23 @@ class Rotina(models.Model):
     nome = models.CharField(max_length=50)
     exercicios = models.ManyToManyField(Exercicio)
 
+    ordem_exercicios = models.CharField(max_length=500, blank=True, default="") 
+
+    def get_exercicios_ordenados(self):
+        """Função mágica para entregar os exercícios na ordem certa"""
+        exercicios = list(self.exercicios.all())
+        if not self.ordem_exercicios:
+            return exercicios 
+        
+        try:
+            ids_ordenados = [int(id_str) for id_str in self.ordem_exercicios.split(',') if id_str.isdigit()]
+            
+            exercicios.sort(key=lambda x: ids_ordenados.index(x.id) if x.id in ids_ordenados else 999)
+        except:
+            pass 
+            
+        return exercicios
+    
     def __str__(self):
         return f"{self.nome} de {self.usuario.username}"
 
@@ -122,3 +139,13 @@ class MedidaCorporal(models.Model):
 
     def __str__(self):
         return f"Medidas de {self.usuario.username} em {self.data}"
+    
+
+class Treino(models.Model):
+    rotina = models.ForeignKey(Rotina, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    data = models.DateTimeField(auto_now_add=True) # Salva a hora que clicou em "Iniciar"
+    finalizado = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Treino de {self.rotina.nome} - {self.data.strftime('%d/%m/%Y')}"

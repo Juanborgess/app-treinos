@@ -7,8 +7,6 @@ self.addEventListener("install", function (e) {
         "/",
         "/static/treinos/style.css",
         "/static/treinos/img/favicon.png",
-        "/static/treinos/execucao.js",
-        "/static/treinos/dashboard.js"
       ]);
     })
   );
@@ -16,8 +14,17 @@ self.addEventListener("install", function (e) {
 
 self.addEventListener("fetch", function (event) {
   event.respondWith(
-    caches.match(event.request).then(function (response) {
-      return response || fetch(event.request);
-    })
+    fetch(event.request)
+      .then(function (response) {
+        // Se a internet funcionar, retorna a página nova E salva no cache
+        return caches.open(staticCacheName).then(function (cache) {
+          cache.put(event.request, response.clone());
+          return response;
+        });
+      })
+      .catch(function () {
+        // Se a internet falhar, tenta pegar do cache
+        return caches.match(event.request);
+      })
   );
 });

@@ -1,4 +1,5 @@
 from django.urls import path
+from treinos import views as treino_views
 from . import views
 
 urlpatterns = [
@@ -26,4 +27,6 @@ urlpatterns = [
     path('rotina/duplicar/<int:rotina_id>/', views.duplicar_rotina, name='duplicar_rotina'),
     path('rotina/excluir/<int:rotina_id>/', views.excluir_rotina, name='excluir_rotina'),
     path('estatisticas/', views.estatisticas, name='estatisticas'),
+    path('rotina/reordenar/<int:rotina_id>/', treino_views.reordenar_rotina, name='reordenar_rotina'),
+    path('rotina/substituir/<int:rotina_id>/', treino_views.substituir_exercicio, name='substituir_exercicio'),
 ]

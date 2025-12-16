@@ -29,7 +29,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-7q0@kg+emzw8k12tpxn1e=ob6(pu0u$xjup)c=9cm*k&&0_uin'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = True 
+# DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
@@ -161,7 +162,10 @@ LOGOUT_REDIRECT_URL = 'login'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 BASE_URL = 'https://app-do-juan.onrender.com'
 
@@ -184,4 +188,4 @@ PWA_APP_ICONS = [
 ]
 
 
-PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'staticfiles', 'serviceworker.js')
+PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'templates', 'serviceworker.js')

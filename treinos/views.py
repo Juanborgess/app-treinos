@@ -7,6 +7,10 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.db.models import Q, Sum, F, Max
 from django.db.models import Count
+from django.views.decorators.csrf import csrf_exempt
+from .models import Rotina, Exercicio
+from django.utils import timezone 
+from .models import Rotina, Exercicio, Treino 
 
 from .models import (
     Rotina, TreinoRealizado, Exercicio, SerieRealizada, 
@@ -172,13 +176,36 @@ def criar_metodo(request):
 @login_required(login_url='/login/')
 def detalhe_rotina(request, id):
     rotina = get_object_or_404(Rotina, id=id, usuario=request.user)
-    return render(request, 'treinos/detalhe_rotina.html', {'rotina': rotina})
+    exercicios_ordenados = rotina.get_exercicios_ordenados()
+    
+    ids_existentes = [e.id for e in exercicios_ordenados]
+    outros_exercicios = Exercicio.objects.exclude(id__in=ids_existentes)
+    # ------------------------
+
+    return render(request, 'treinos/detalhe_rotina.html', {
+        'rotina': rotina,
+        'exercicios': exercicios_ordenados,
+        'outros_exercicios': outros_exercicios 
+    })
 
 @login_required(login_url='/login/')
 def iniciar_treino(request, rotina_id):
     rotina = get_object_or_404(Rotina, id=rotina_id, usuario=request.user)
-    treino = TreinoRealizado.objects.create(rotina=rotina)
-    return redirect('treino_em_andamento', treino_id=treino.id)
+    
+    treino = Treino.objects.create(
+        rotina=rotina,
+        usuario=request.user,
+        data=timezone.now(),
+        finalizado=False
+    )
+    
+    exercicios = rotina.get_exercicios_ordenados()
+    
+    return render(request, 'treinos/treino_em_andamento.html', {
+        'rotina': rotina,
+        'exercicios': exercicios,
+        'treino': treino
+    })
 
 @login_required(login_url='/login/')
 def treino_em_andamento(request, treino_id):
@@ -227,9 +254,13 @@ def finalizar_treino(request, treino_id):
 
 @login_required(login_url='/login/')
 def cancelar_treino(request, treino_id):
-    treino = get_object_or_404(TreinoRealizado, id=treino_id, rotina__usuario=request.user)
+    treino = get_object_or_404(Treino, id=treino_id, usuario=request.user)
+    
+    rotina_id = treino.rotina.id 
+    
     treino.delete()
-    return redirect('home')
+    
+    return redirect('detalhe_rotina', id=rotina_id)
 
 
 @login_required(login_url='/login/')
@@ -382,3 +413,53 @@ def estatisticas(request):
         'labels': labels,
         'data': data
     })
+    
+@login_required(login_url='/login/')
+def reordenar_rotina(request, rotina_id):
+    if request.method == "POST":
+        try:
+            rotina = Rotina.objects.get(id=rotina_id, usuario=request.user)
+            dados = json.loads(request.body)
+            nova_ordem = dados.get('ordem', []) # Recebe uma lista [10, 5, 2]
+            
+            # Transforma a lista em texto "10,5,2" e salva
+            rotina.ordem_exercicios = ",".join(map(str, nova_ordem))
+            rotina.save()
+            
+            return JsonResponse({'status': 'sucesso'})
+        except Exception as e:
+            return JsonResponse({'status': 'erro', 'msg': str(e)}, status=400)
+    return JsonResponse({'status': 'erro'}, status=400)
+
+
+@login_required(login_url='/login/')
+def substituir_exercicio(request, rotina_id):
+    if request.method == "POST":
+        try:
+            rotina = get_object_or_404(Rotina, id=rotina_id, usuario=request.user)
+            data = json.loads(request.body)
+            
+            id_antigo = str(data.get('id_antigo'))
+            id_novo = str(data.get('id_novo'))
+            
+            exercicio_antigo = Exercicio.objects.get(id=id_antigo)
+            exercicio_novo = Exercicio.objects.get(id=id_novo)
+            
+            rotina.exercicios.remove(exercicio_antigo)
+            rotina.exercicios.add(exercicio_novo)
+            
+            if rotina.ordem_exercicios:
+                lista_ids = rotina.ordem_exercicios.split(',')
+                
+                if id_antigo in lista_ids:
+                    index = lista_ids.index(id_antigo)
+                    lista_ids[index] = id_novo
+                    rotina.ordem_exercicios = ",".join(lista_ids)
+                    rotina.save()
+            
+            return JsonResponse({'status': 'sucesso'})
+            
+        except Exception as e:
+            return JsonResponse({'status': 'erro', 'msg': str(e)}, status=400)
+            
+    return JsonResponse({'status': 'erro'}, status=400)
