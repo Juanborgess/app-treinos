@@ -52,4 +52,41 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(err => console.error('Erro:', err));
     }
+
+    window.filtrarOpcoesTroca = function() {
+        const input = document.getElementById('inputBuscaTroca');
+        const termo = input.value.toLowerCase();
+        
+        const opcoes = document.querySelectorAll('.opcao-troca');
+        let encontrouAlgum = false;
+
+        opcoes.forEach(opcao => {
+            const nome = opcao.getAttribute('data-nome');
+            
+            if (nome.includes(termo)) {
+                opcao.style.display = 'flex';
+                encontrouAlgum = true;
+            } else {
+                opcao.style.display = 'none';
+            }
+        });
+
+        const msgVazia = document.getElementById('msgNenhumEncontrado');
+        if (msgVazia) {
+            msgVazia.style.display = encontrouAlgum ? 'none' : 'block';
+        }
+    }
+    
+    const funcaoAbrirOriginal = window.abrirModalTroca;
+    window.abrirModalTroca = function(idAntigo) {
+        funcaoAbrirOriginal(idAntigo);
+        
+        const input = document.getElementById('inputBuscaTroca');
+        if (input) {
+            input.value = '';
+            window.filtrarOpcoesTroca(); 
+            input.focus(); 
+        }
+    }
+
 });

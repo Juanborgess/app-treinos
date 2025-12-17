@@ -82,32 +82,44 @@
     </main>
 
     <div id="modal-troca" 
-         data-url="{% url 'substituir_exercicio' rotina.id %}"
-         data-csrf="{{ csrf_token }}"
-         style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: flex-end;">
+     data-url="{% url 'substituir_exercicio' rotina.id %}"
+     data-csrf="{{ csrf_token }}"
+     style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: flex-end;">
+    
+    <div style="background: #1a1a1a; width: 100%; max-height: 80vh; border-radius: 20px 20px 0 0; padding: 20px; display: flex; flex-direction: column; animation: slideUp 0.3s ease-out; border-top: 1px solid #333;">
         
-        <div style="background: #1a1a1a; width: 100%; max-height: 80vh; border-radius: 20px 20px 0 0; padding: 20px; display: flex; flex-direction: column; animation: slideUp 0.3s ease-out; border-top: 1px solid #333;">
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #333;">
-                <h3 style="color: white; margin: 0; font-size: 1.2rem;">Substituir por...</h3>
-                <button onclick="fecharModal()" style="background: none; border: none; color: #666; font-size: 2rem; line-height: 1;">&times;</button>
-            </div>
-
-            <div style="overflow-y: auto; flex-grow: 1;">
-                {% for op in outros_exercicios %}
-                <div onclick="confirmarTroca('{{ op.id }}')" 
-                     style="padding: 15px 0; border-bottom: 1px solid #2a2a2a; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div style="color: white; font-weight: 500;">{{ op.nome }}</div>
-                        <small style="color: #888;">{{ op.get_grupo_muscular_display }}</small>
-                    </div>
-                    <div style="color: #00ff88; font-weight: bold; font-size: 0.9rem;">ESCOLHER</div>
-                </div>
-                {% empty %}
-                    <p style="color: #666; text-align: center; padding: 20px;">Sem outras opções disponíveis.</p>
-                {% endfor %}
-            </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="color: white; margin: 0; font-size: 1.2rem;">Substituir por...</h3>
+            <button onclick="fecharModal()" style="background: none; border: none; color: #666; font-size: 2rem; line-height: 1;">&times;</button>
         </div>
+
+        <div style="margin-bottom: 15px;">
+            <input type="text" 
+                   id="inputBuscaTroca" 
+                   onkeyup="filtrarOpcoesTroca()" 
+                   placeholder="🔍 Buscar exercício..." 
+                   style="width: 100%; padding: 12px; border-radius: 12px; background: #000; border: 1px solid #333; color: white; font-size: 1rem; outline: none;">
+        </div>
+
+        <div style="overflow-y: auto; flex-grow: 1;">
+            {% for op in outros_exercicios %}
+            <div class="opcao-troca" 
+                 data-nome="{{ op.nome|lower }}"
+                 onclick="confirmarTroca('{{ op.id }}')" 
+                 style="padding: 15px 0; border-bottom: 1px solid #2a2a2a; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="color: white; font-weight: 500;">{{ op.nome }}</div>
+                    <small style="color: #888;">{{ op.get_grupo_muscular_display }}</small>
+                </div>
+                <div style="color: #00ff88; font-weight: bold; font-size: 0.9rem;">ESCOLHER</div>
+            </div>
+            {% empty %}
+                <p style="color: #666; text-align: center; padding: 20px;">Sem outras opções disponíveis.</p>
+            {% endfor %}
+            
+            <p id="msgNenhumEncontrado" style="display: none; color: #666; text-align: center; padding: 20px;">Nenhum exercício encontrado com esse nome.</p>
+        </div>
+    </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
