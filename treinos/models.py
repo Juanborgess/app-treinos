@@ -144,8 +144,18 @@ class MedidaCorporal(models.Model):
 class Treino(models.Model):
     rotina = models.ForeignKey(Rotina, on_delete=models.CASCADE)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
-    data = models.DateTimeField(auto_now_add=True) # Salva a hora que clicou em "Iniciar"
+    data = models.DateTimeField(auto_now_add=True)
     finalizado = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Treino de {self.rotina.nome} - {self.data.strftime('%d/%m/%Y')}"
+    
+class Serie(models.Model):
+    treino = models.ForeignKey(Treino, on_delete=models.CASCADE)
+    exercicio = models.ForeignKey(Exercicio, on_delete=models.CASCADE)
+    metodo = models.ForeignKey(Metodo, on_delete=models.SET_NULL, null=True)
+    peso = models.DecimalField(max_digits=6, decimal_places=2, validators=[MinValueValidator(0.1)])
+    repeticoes = models.IntegerField(validators=[MinValueValidator(1)])
+    
+    def __str__(self):
+        return f"{self.exercicio.nome}: {self.peso}kg"

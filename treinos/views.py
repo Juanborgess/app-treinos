@@ -10,7 +10,7 @@ from django.db.models import Count
 from django.views.decorators.csrf import csrf_exempt
 from .models import Rotina, Exercicio
 from django.utils import timezone 
-from .models import Rotina, Exercicio, Treino 
+from .models import Rotina, Exercicio, Treino, Metodo, Serie, SerieRealizada
 
 from .models import (
     Rotina, TreinoRealizado, Exercicio, SerieRealizada, 
@@ -192,6 +192,7 @@ def detalhe_rotina(request, id):
 def iniciar_treino(request, rotina_id):
     rotina = get_object_or_404(Rotina, id=rotina_id, usuario=request.user)
     
+    # 1. Cria o Treino Novo
     treino = Treino.objects.create(
         rotina=rotina,
         usuario=request.user,
@@ -200,11 +201,31 @@ def iniciar_treino(request, rotina_id):
     )
     
     exercicios = rotina.get_exercicios_ordenados()
+    metodos = Metodo.objects.all() 
     
+    for exercicio in exercicios:
+        ultima_serie = Serie.objects.filter(
+            exercicio=exercicio, 
+            treino__usuario=request.user
+        ).order_by('-id').first()
+        
+        if not ultima_serie:
+            ultima_serie = SerieRealizada.objects.filter(
+                exercicio=exercicio,
+                treino__rotina__usuario=request.user
+            ).order_by('-id').first()
+
+        if ultima_serie:
+            exercicio.ghost_set = f"{ultima_serie.peso}kg x {ultima_serie.repeticoes}"
+        else:
+            exercicio.ghost_set = "Sem histórico"
+
     return render(request, 'treinos/treino_em_andamento.html', {
         'rotina': rotina,
         'exercicios': exercicios,
-        'treino': treino
+        'treino': treino,
+        'metodos': metodos,
+        'series_por_exercicio': {} 
     })
 
 @login_required(login_url='/login/')
