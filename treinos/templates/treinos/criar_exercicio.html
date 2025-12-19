@@ -1,28 +1,57 @@
+{% extends 'treinos/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Novo Exercício</title>
-    <link rel="stylesheet" href="{% static 'treinos/style.css' %}">
-</head>
-<body>
-    <header>
-        <div class="logo">Novo <span>Exercício</span></div>
-        <a href="{% url 'criar_rotina' %}" style="color: #71717a; text-decoration: none;">Voltar</a>
-    </header>
-    <main style="max-width: 400px; margin: 20px auto;">
+
+{% block content %}
+<div class="container" style="padding-top: 20px; padding-bottom: 80px;">
+
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px;">
+        <h2 style="color: #fff; margin: 0; font-size: 1.5rem;">Novo <span style="color: var(--primary);">Exercício</span></h2>
+        
+        {% if treino_id %}
+            <a href="{% url 'treino_em_andamento' treino_id %}" style="color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 6px; font-size: 0.9rem; font-weight: bold;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Voltar ao Treino
+            </a>
+        {% else %}
+            <a href="{% url 'criar_rotina' %}" style="color: var(--text-muted); text-decoration: none; display: flex; align-items: center; gap: 6px; font-size: 0.9rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Voltar
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="card" style="padding: 25px;">
         <form method="post" action="{{ request.get_full_path }}">
             {% csrf_token %}
-            <label style="color: #a1a1aa; display:block; margin-bottom:5px;">Nome</label>
-            {{ form.nome }}
-            <br><br>
-            <label style="color: #a1a1aa; display:block; margin-bottom:5px;">Grupo Muscular</label>
-            {{ form.grupo_muscular }}
             
-            <button type="submit" class="btn-full" style="margin-top: 30px;">SALVAR</button>
+            {% if form.nome.errors %}
+                <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: #fca5a5; padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; font-size: 0.9rem; display: flex; align-items: center; gap: 10px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span>{{ form.nome.errors.0 }}</span>
+                </div>
+            {% endif %}
+            
+            <div style="margin-bottom: 20px;">
+                <label style="color: var(--text-muted); display:block; margin-bottom: 8px; font-size: 0.9rem;">Nome do Exercício</label>
+                {{ form.nome }}
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <label style="color: var(--text-muted); display:block; margin-bottom: 8px; font-size: 0.9rem;">Grupo Muscular</label>
+                {{ form.grupo_muscular }}
+            </div>
+            
+            <button type="submit" class="btn-full">
+                SALVAR EXERCÍCIO
+            </button>
         </form>
-    </main>
-</body>
-</html>
+    </div>
+
+</div>
+{% endblock %}

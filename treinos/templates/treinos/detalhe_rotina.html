@@ -1,104 +1,92 @@
+{% extends 'treinos/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ rotina.nome }}</title>
-    <link rel="stylesheet" href="{% static 'treinos/style.css' %}">
-    
-    <style>
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-        .btn-icon {
-            background: none; border: none; cursor: pointer; padding: 8px;
-            color: #00ff88; transition: transform 0.2s;
-        }
-        .btn-icon:active { transform: scale(0.9); }
-    </style>
-</head>
-<body>
 
-    <header>
-        <a href="{% url 'home' %}" style="color: #a1a1aa; display: flex; align-items: center; justify-content: center;">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px; height: 24px;">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+{% block content %}
+<div class="container" style="padding-top: 20px; padding-bottom: 80px;">
+
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px;">
+        <h2 style="color: #fff; margin: 0; font-size: 1.5rem;">{{ rotina.nome }}</h2>
+        
+        <a href="{% url 'home' %}" style="color: var(--text-muted); text-decoration: none; display: flex; align-items: center; gap: 6px; font-size: 0.9rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
+            Voltar
         </a>
-        <div class="logo" style="color: #fff;">{{ rotina.nome }}</div>
-        <div style="width: 24px;"></div> 
-    </header>
+    </div>
 
-    <main>
-        <h2 style="margin-top: 10px;">Exercícios</h2>
+    <h3 style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;">
+        Exercícios Planejados
+    </h3>
 
-        <div class="card-list" 
-             id="lista-exercicios" 
-             data-url="{% url 'reordenar_rotina' rotina.id %}"
-             data-csrf="{{ csrf_token }}">
+    <div class="card-list" 
+         id="lista-exercicios" 
+         data-url="{% url 'reordenar_rotina' rotina.id %}"
+         data-csrf="{{ csrf_token }}">
 
-            {% for exercicio in exercicios %}
-            <div class="card item-exercicio" data-id="{{ exercicio.id }}" style="cursor: default; position: relative; margin-bottom: 15px;"> 
+        {% for exercicio in exercicios %}
+        <div class="card item-exercicio" data-id="{{ exercicio.id }}" style="cursor: default; position: relative; padding: 15px 20px;"> 
+            
+            <div style="display: flex; align-items: center; justify-content: space-between;">
                 
-                <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
-                    
-                    <div style="display: flex; align-items: center; flex-grow: 1;">
-                        <div class="handle" style="cursor: grab; padding-right: 15px; color: var(--text-muted, #888); display: flex; align-items: center;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="card-title" style="margin: 0;">{{ exercicio.nome }}</h3>
-                            <span class="badge">{{ exercicio.get_grupo_muscular_display }}</span>
-                        </div>
-                    </div>
-
-                    <button class="btn-icon" onclick="abrirModalTroca('{{ exercicio.id }}')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M11 19l-3 3-3-3m3 3V8a2 2 0 0 1 2-2h8m-3-11l3-3 3 3m-3-3v14a2 2 0 0 1-2 2H8"/>
+                <div style="display: flex; align-items: center; flex-grow: 1;">
+                    <div class="handle" style="cursor: grab; padding-right: 15px; color: var(--text-muted); display: flex; align-items: center;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>
                         </svg>
-                    </button>
-
+                    </div>
+                    
+                    <div>
+                        <h3 class="card-title" style="margin: 0; font-size: 1rem;">{{ exercicio.nome }}</h3>
+                        <span style="color: var(--primary); font-size: 0.8rem; font-weight: 600;">{{ exercicio.get_grupo_muscular_display }}</span>
+                    </div>
                 </div>
-                
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px; padding-left: 40px;">
-                    4 Séries planejadas
-                </p>
+
+                <button onclick="abrirModalTroca('{{ exercicio.id }}')" style="background: none; border: none; color: var(--text-muted); padding: 5px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 19l-3 3-3-3m3 3V8a2 2 0 0 1 2-2h8m-3-11l3-3 3 3m-3-3v14a2 2 0 0 1-2 2H8"/>
+                    </svg>
+                </button>
+
             </div>
-            {% empty %}
-                 <p class="text-muted" style="text-align: center; margin-top: 20px;">Nenhum exercício cadastrado.</p>
-            {% endfor %}
+            
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 5px; padding-left: 40px;">
+                4 Séries planejadas
+            </p>
         </div>
+        {% empty %}
+             <div class="card" style="text-align: center; border-style: dashed; padding: 30px;">
+                <p style="color: var(--text-muted);">Nenhum exercício cadastrado nesta rotina.</p>
+            </div>
+        {% endfor %}
+    </div>
 
-        <div style="height: 80px;"></div>
-
-        <a href="{% url 'iniciar_treino' rotina.id %}" class="fab pulse-glow" style="width: 100%; border-radius: 12px; bottom: 20px; right: 0; position: relative; font-weight: bold; font-size: 1.1rem; color: #000; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+    <div style="margin-top: 30px;">
+        <a href="{% url 'iniciar_treino' rotina.id %}" class="btn-full pulse-glow" style="text-decoration: none;">
             INICIAR TREINO
         </a>
+    </div>
 
-    </main>
+</div>
 
-    <div id="modal-troca" 
+<div id="modal-troca" 
      data-url="{% url 'substituir_exercicio' rotina.id %}"
      data-csrf="{{ csrf_token }}"
      style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: flex-end;">
     
-    <div style="background: #1a1a1a; width: 100%; max-height: 80vh; border-radius: 20px 20px 0 0; padding: 20px; display: flex; flex-direction: column; animation: slideUp 0.3s ease-out; border-top: 1px solid #333;">
+    <div style="background: var(--bg-panel); width: 100%; max-height: 80vh; border-radius: 20px 20px 0 0; padding: 20px; display: flex; flex-direction: column; animation: slideUp 0.3s ease-out; border-top: 1px solid var(--border);">
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3 style="color: white; margin: 0; font-size: 1.2rem;">Substituir por...</h3>
-            <button onclick="fecharModal()" style="background: none; border: none; color: #666; font-size: 2rem; line-height: 1;">&times;</button>
+            <h3 style="color: white; margin: 0; font-size: 1.2rem;">Substituir Exercício</h3>
+            <button onclick="fecharModal()" style="background: none; border: none; color: var(--text-muted); font-size: 2rem; line-height: 1;">&times;</button>
         </div>
 
         <div style="margin-bottom: 15px;">
             <input type="text" 
                    id="inputBuscaTroca" 
                    onkeyup="filtrarOpcoesTroca()" 
-                   placeholder="🔍 Buscar exercício..." 
-                   style="width: 100%; padding: 12px; border-radius: 12px; background: #000; border: 1px solid #333; color: white; font-size: 1rem; outline: none;">
+                   placeholder="🔍 Buscar..." 
+                   style="width: 100%;">
         </div>
 
         <div style="overflow-y: auto; flex-grow: 1;">
@@ -106,25 +94,28 @@
             <div class="opcao-troca" 
                  data-nome="{{ op.nome|lower }}"
                  onclick="confirmarTroca('{{ op.id }}')" 
-                 style="padding: 15px 0; border-bottom: 1px solid #2a2a2a; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                 style="padding: 15px 0; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <div style="color: white; font-weight: 500;">{{ op.nome }}</div>
-                    <small style="color: #888;">{{ op.get_grupo_muscular_display }}</small>
+                    <small style="color: var(--text-muted);">{{ op.get_grupo_muscular_display }}</small>
                 </div>
-                <div style="color: #00ff88; font-weight: bold; font-size: 0.9rem;">ESCOLHER</div>
+                <div style="color: var(--primary); font-weight: bold; font-size: 0.8rem;">ESCOLHER</div>
             </div>
             {% empty %}
-                <p style="color: #666; text-align: center; padding: 20px;">Sem outras opções disponíveis.</p>
+                <p style="color: var(--text-muted); text-align: center; padding: 20px;">Sem outras opções.</p>
             {% endfor %}
             
-            <p id="msgNenhumEncontrado" style="display: none; color: #666; text-align: center; padding: 20px;">Nenhum exercício encontrado com esse nome.</p>
+            <p id="msgNenhumEncontrado" style="display: none; color: var(--text-muted); text-align: center; padding: 20px;">Nenhum exercício encontrado.</p>
         </div>
     </div>
-    </div>
+</div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    <script src="{% static 'treinos/reordenar.js' %}"></script>
-    <script src="{% static 'treinos/substituir.js' %}"></script>
+<style>
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+</style>
 
-</body>
-</html>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<script src="{% static 'treinos/reordenar.js' %}"></script>
+<script src="{% static 'treinos/substituir.js' %}"></script>
+
+{% endblock %}

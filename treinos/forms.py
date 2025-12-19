@@ -17,7 +17,7 @@ class RotinaForm(forms.ModelForm):
     
     # Checkbox inteligente
     exercicios = forms.ModelMultipleChoiceField(
-        queryset=Exercicio.objects.none(), # Começa vazio
+        queryset=Exercicio.objects.none(),
         widget=forms.CheckboxSelectMultiple,
         label="Quais exercícios?"
     )
@@ -36,15 +36,35 @@ class RotinaForm(forms.ModelForm):
             raise forms.ValidationError("Selecione pelo menos um exercício!")
         return exercicios
 
-# Formulário para criar Exercício Novo
 class ExercicioForm(forms.ModelForm):
     class Meta:
         model = Exercicio
         fields = ['nome', 'grupo_muscular']
         widgets = {
-            'nome': forms.TextInput(attrs={'placeholder': 'Ex: Leg Press 45', 'style': 'width: 100%; background: #09090b; color: #fff; border: 1px solid #3f3f46; padding: 10px; border-radius: 8px;'}),
-            'grupo_muscular': forms.Select(attrs={'style': 'width: 100%; background: #09090b; color: #fff; border: 1px solid #3f3f46; padding: 10px; border-radius: 8px;'}),
+            'nome': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Ex: Supino Reto',
+                'style': 'background: #18181b; color: white; border: 1px solid #333; border-radius: 12px; padding: 15px;'
+            }),
+            'grupo_muscular': forms.Select(attrs={
+                'class': 'form-control',
+                'style': 'background: #18181b; color: white; border: 1px solid #333; border-radius: 12px; padding: 15px;'
+            })
         }
+
+    def clean_nome(self):
+        nome_original = self.cleaned_data.get('nome')
+        if nome_original:
+            nome_limpo = " ".join(nome_original.split()).title()
+        else:
+            return nome_original
+
+        existe = Exercicio.objects.filter(nome__iexact=nome_limpo).exclude(pk=self.instance.pk).exists()
+
+        if existe:
+            raise forms.ValidationError(f"O exercício '{nome_limpo}' já existe na biblioteca!")
+
+        return nome_limpo
 
 # Formulário para criar Método Novo (Com seletor de cor!)
 class MetodoForm(forms.ModelForm):

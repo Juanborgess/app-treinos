@@ -1,0 +1,66 @@
+{% extends 'treinos/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container" style="padding: 20px; padding-bottom: 80px;">
+    
+    <div style="margin-bottom: 25px;">
+        <a href="{% url 'home' %}" style="color: #888; text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 5px;">
+            &larr; Voltar
+        </a>
+        
+        <h2 style="color: white; margin: 15px 0 5px 0; font-size: 1.5rem;">
+            {{ treino.rotina.nome|default:"Treino Avulso" }}
+        </h2>
+        
+        <p style="color: #00ff88; margin: 0;">
+            {{ treino.data|date:"d de F, Y" }} <span style="color: #666;">às {{ treino.data|date:"H:i" }}</span>
+        </p>
+
+        {% if is_antigo %}
+            <div style="margin-top: 10px;">
+                <span style="background: #333; color: #aaa; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem;">Arquivo Histórico</span>
+            </div>
+        {% endif %}
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        
+        {% for exercicio, series_lista in dados.items %}
+        <div style="background: #18181b; padding: 20px; border-radius: 12px; border: 1px solid #333;">
+            
+            <h3 style="color: white; font-size: 1.1rem; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">
+                {{ exercicio.nome }}
+            </h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                {% for serie in series_lista %}
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 6px;">
+                    
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        {% if not is_antigo and serie.metodo %}
+                            <span style="border: 1px solid {{ serie.metodo.cor }}; color: {{ serie.metodo.cor }}; font-size: 0.7rem; padding: 1px 4px; border-radius: 4px; font-weight: bold;">
+                                {{ serie.metodo.sigla }}
+                            </span>
+                        {% endif %}
+
+                        <span style="color: white; font-weight: 600; font-size: 1rem;">
+                            {{ serie.peso }}kg
+                        </span>
+                    </div>
+
+                    <span style="color: #888; font-size: 0.9rem;">
+                        {{ serie.repeticoes }} reps
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+        {% empty %}
+            <p style="color: #666; text-align: center;">Nenhum exercício registrado neste treino.</p>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}
