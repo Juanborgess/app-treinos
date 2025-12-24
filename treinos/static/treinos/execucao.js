@@ -1,8 +1,35 @@
 /* ==========================================================================
+   0. CONFIGURAÇÃO DE ÁUDIO E VIBRAÇÃO
+   ========================================================================== */
+const audioTimer = new Audio('/static/treinos/sons/timer.mp3');
+const audioPR = new Audio('/static/treinos/sons/pr.mp3');
+
+audioTimer.volume = 0.4; 
+audioPR.volume = 0.4;
+
+function feedbackSensorial(tipo) {
+    try {
+        if (tipo === 'timer') {
+            audioTimer.currentTime = 0; 
+            audioTimer.play().catch(e => console.log("Audio bloqueado pelo navegador"));
+            
+            if (navigator.vibrate) navigator.vibrate(800); 
+        } 
+        else if (tipo === 'pr') {
+            audioPR.currentTime = 0;
+            audioPR.play().catch(e => console.log("Audio bloqueado"));
+            
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+        }
+    } catch (err) {
+        console.log("Erro no feedback sensorial:", err);
+    }
+}
+
+/* ==========================================================================
    1. CONFIGURAÇÕES E UTILITÁRIOS GLOBAIS
    ========================================================================== */
 
-// Pega o token CSRF para segurança do Django
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -18,7 +45,6 @@ function getCookie(name) {
     return cookieValue;
 }
 
-// Garante que o CSS de animação de loading (spin) exista
 if (!document.getElementById('spin-style')) {
     const style = document.createElement('style');
     style.id = 'spin-style';
@@ -26,9 +52,7 @@ if (!document.getElementById('spin-style')) {
     document.head.appendChild(style);
 }
 
-// Inicialização ao carregar a página
 document.addEventListener("DOMContentLoaded", function() {
-    // Aplica cores aos selects já existentes
     document.querySelectorAll('select').forEach(sel => atualizarCorSelect(sel));
 });
 
@@ -45,18 +69,15 @@ function iniciarCronometro(segundos = 90) {
     const painel = document.getElementById('restTimer');
     const barra = document.getElementById('timerProgress');
     
-    // Se não tiver painel de timer na tela, cancela
     if(!painel) return;
 
-    // Reseta estado anterior
     clearInterval(timerInterval);
     tempoRestante = segundos;
     tempoTotal = segundos;
     isTimerRunning = true;
 
-    // Mostra o painel (sobe a barrinha)
     painel.classList.add('active');
-    painel.style.transform = "translateY(0)"; // Garante que suba
+    painel.style.transform = "translateY(0)"; 
     
     atualizarDisplayTimer();
 
@@ -64,17 +85,19 @@ function iniciarCronometro(segundos = 90) {
         tempoRestante--;
         atualizarDisplayTimer();
 
-        // Atualiza a largura da barra de progresso visual
         if(barra) {
             const pct = (tempoRestante / tempoTotal) * 100;
             barra.style.width = `${pct}%`;
         }
 
-        // Fim do tempo
         if (tempoRestante <= 0) {
             pararCronometro();
-            // Vibração no celular (2 pulsos)
-            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+            
+            audioTimer.currentTime = 0;
+            audioTimer.play().catch(e => console.log("Autoplay bloqueado pelo navegador"));
+
+            if (navigator.vibrate) navigator.vibrate(800);
+            
             showToast("⏰ Descanso Finalizado!", "gold");
         }
     }, 1000);
@@ -85,7 +108,6 @@ function pararCronometro() {
     isTimerRunning = false;
     const painel = document.getElementById('restTimer');
     
-    // Esconde o painel
     if(painel) {
         painel.classList.remove('active');
         painel.style.transform = "translateY(110%)"; // Desce a barrinha
@@ -96,12 +118,10 @@ function ajustarTempo(segundos) {
     tempoRestante += segundos;
     if (tempoRestante < 0) tempoRestante = 0;
     
-    // Se aumentou o tempo, atualiza o total para a barra não quebrar visualmente
     if (tempoRestante > tempoTotal) tempoTotal = tempoRestante;
     
     atualizarDisplayTimer();
 
-    // Se o timer estava parado e o usuário adicionou tempo, reinicia
     if (!isTimerRunning && tempoRestante > 0) {
         iniciarCronometro(tempoRestante);
     }
@@ -121,57 +141,69 @@ function atualizarDisplayTimer() {
    3. INTERFACE VISUAL (UI)
    ========================================================================== */
 
-// Atualiza a cor do <select> baseado na opção escolhida (Cores dos métodos)
 function atualizarCorSelect(selectElement) {
     if (!selectElement) return;
     const selectedOption = selectElement.options[selectElement.selectedIndex];
-    // Pega a cor do data-attribute ou usa branco como fallback
     const color = selectedOption.getAttribute('data-cor') || '#fff';
     selectElement.style.color = color;
     selectElement.style.borderColor = color;
 }
 
-// Cria uma linha visual na tabela de séries após salvar
 function adicionarLinhaNaTabela(exercicioId, data) {
+    console.log("=== ADICIONANDO LINHA ===", data);
+
     const listaDiv = document.getElementById(`lista_series_${exercicioId}`);
-    if (!listaDiv) return;
+
+    if (!listaDiv) {
+        console.error(`ERRO: Não encontrei a div id="lista_series_${exercicioId}"`);
+        alert("Erro visual: A lista de séries não foi encontrada no HTML.");
+        return;
+    }
     
+    const cor = data.metodo_cor || data.cor || '#ffffff';
+    const sigla = data.metodo_sigla || data.sigla || 'N';
+    const reps = data.reps || data.repeticoes || '0';
+    const peso = data.peso || '0';
+
     const novaLinha = document.createElement('div');
     novaLinha.className = 'saved-set';
     novaLinha.id = `linha_serie_${data.serie_id}`;
-    novaLinha.style.animation = "fadeIn 0.5s ease"; // Animação suave
     
+    novaLinha.style.animation = "fadeIn 0.5s ease"; 
+    novaLinha.style.display = "flex";
+    novaLinha.style.alignItems = "center";
+    novaLinha.style.justifyContent = "space-between";
+    novaLinha.style.padding = "10px 0";
+    novaLinha.style.borderBottom = "1px solid rgba(255,255,255,0.1)";
+
     novaLinha.innerHTML = `
-        <div class="saved-set-info">
-            <span class="saved-method" style="color: ${data.metodo_cor}; border: 1px solid ${data.metodo_cor}; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; margin-right: 10px; min-width: 25px; text-align: center;">
-                ${data.metodo_sigla}
+        <div class="saved-set-info" style="display: flex; align-items: center;">
+            <span class="saved-method" style="color: ${cor}; border: 1px solid ${cor}; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; margin-right: 10px; min-width: 25px; text-align: center;">
+                ${sigla}
             </span>
             <span style="color: #fff; font-weight: 600;">
-                ${data.peso}kg <span style="color:#71717a; font-weight:400;">x</span> ${data.reps}
+                ${peso}kg <span style="color:#71717a; font-weight:400; margin: 0 5px;">x</span> ${reps}
             </span>
         </div>
-        <button class="btn-delete" onclick="excluirSerie(${data.serie_id})">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        <button class="btn-delete" onclick="excluirSerie(${data.serie_id})" style="background: none; border: none; color: #52525b; padding: 5px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
     `;
     
     listaDiv.appendChild(novaLinha);
 }
 
-// Notificações Flutuantes (Toasts)
 function showToast(message, type = 'normal') {
     let container = document.querySelector('.toast-container');
     if (!container) {
         container = document.createElement('div');
         container.className = 'toast-container';
-        // Estilos básicos caso o CSS falhe
         container.style.cssText = "position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; pointer-events: none;";
         document.body.appendChild(container);
     }
     
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    // Adiciona classe de cor diretamente para garantir
     if (type === 'gold') toast.style.borderColor = '#fbbf24';
     
     toast.innerHTML = `<span>${message}</span>`;
@@ -190,17 +222,20 @@ function showToast(message, type = 'normal') {
    4. AÇÕES DE TREINO (API)
    ========================================================================== */
 
-// --- SALVAR SÉRIE ---
 function salvarSerie(treinoId, exercicioId) {
     const tipoInput = document.getElementById(`tipo_${exercicioId}`);
     const pesoInput = document.getElementById(`peso_${exercicioId}`);
     const repsInput = document.getElementById(`reps_${exercicioId}`);
     const btn = document.getElementById(`btn_${exercicioId}`);
 
-    if (!pesoInput || !repsInput) return;
+    if (!pesoInput || !repsInput || !btn) {
+        console.error(`Erro: Elementos do exercício ${exercicioId} não encontrados.`);
+        return;
+    }
 
-    const tipoId = tipoInput.value;
-    const peso = pesoInput.value;
+    const tipoId = tipoInput ? tipoInput.value : null;
+
+    const peso = pesoInput.value.replace(',', '.');
     const reps = repsInput.value;
 
     if (!peso || !reps) { 
@@ -208,7 +243,6 @@ function salvarSerie(treinoId, exercicioId) {
         return; 
     }
 
-    // Loading no botão
     const originalContent = btn.innerHTML;
     btn.innerHTML = `<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style="width:20px; height:20px; animation: spin 1s linear infinite;"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>`;
     btn.disabled = true;
@@ -224,28 +258,37 @@ function salvarSerie(treinoId, exercicioId) {
     .then(r => r.json())
     .then(data => {
         if(data.status === 'sucesso') {
-            // Se for recorde, mostra confete/aviso
-            if (data.is_pr) showToast("🏆 Novo Recorde Pessoal!", "gold");
-
-            // Atualiza tela
-            adicionarLinhaNaTabela(exercicioId, data);
             
-            // UX: Limpa reps, foca no input e inicia descanso
+            if (data.is_pr) {
+                showToast("🏆 Novo Recorde Pessoal!", "gold");
+
+                const audioPR = new Audio('/static/treinos/sons/pr.mp3');
+                audioPR.volume = 0.4; 
+                audioPR.play().catch(e => console.log("Audio autoplay bloqueado"));
+
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+            }
+            // --------------------------------------------
+
+            adicionarLinhaNaTabela(exercicioId, data);
+
             repsInput.value = '';
             repsInput.focus(); 
-            iniciarCronometro(90); // Inicia descanso de 90s
+            iniciarCronometro(90); 
         } else {
             alert("Erro: " + data.msg);
         }
     })
-    .catch(() => alert("Erro de conexão."))
+    .catch((err) => {
+        console.error("Erro no fetch:", err);
+        alert("Erro de conexão.");
+    })
     .finally(() => {
         btn.disabled = false;
         btn.innerHTML = originalContent;
     });
 }
 
-// --- EXCLUIR SÉRIE ---
 function excluirSerie(serieId) {
     if(!confirm("Excluir esta série?")) return;
     
@@ -267,7 +310,6 @@ function excluirSerie(serieId) {
     });
 }
 
-// --- SALVAR NOTA (AUTO-SAVE) ---
 function salvarNota(exercicioId) {
     const input = document.getElementById(`nota_${exercicioId}`);
     
@@ -285,7 +327,6 @@ function salvarNota(exercicioId) {
     .then(r => r.json())
     .then(d => {
         if(d.status === 'sucesso') {
-            // Feedback visual sutil (borda pisca)
             input.style.borderColor = 'var(--primary)';
             setTimeout(() => { input.style.borderColor = 'transparent'; }, 1000);
         }
@@ -301,7 +342,6 @@ function adicionarExercicio(exercicioId) {
         console.error("ID do treino não definido"); 
         return; 
     }
-    // Redireciona para a view que adiciona e recarrega
     window.location.href = `/add_ex_treino/${GLOBAL_TREINO_ID}/${exercicioId}/`;
 }
 
@@ -316,13 +356,12 @@ function removerExercicioDoTreino(exercicioId) {
         if (data.status === 'ok') {
             const card = document.getElementById(`card_exercicio_${exercicioId}`);
             if (card) {
-                // Animação de saída
                 card.style.transition = "all 0.4s ease";
                 card.style.opacity = "0";
                 card.style.transform = "translateX(50px)";
                 setTimeout(() => card.remove(), 400);
             } else {
-                location.reload(); // Fallback se não achar o elemento
+                location.reload();
             }
         } else {
             alert("Erro ao remover.");
@@ -343,7 +382,7 @@ function abrirModalExercicios() {
         if (campo) { 
             campo.value = ''; 
             campo.focus(); 
-            filtrarExercicios(); // Reseta filtro
+            filtrarExercicios(); 
         }
     }
 }
@@ -357,13 +396,12 @@ function filtrarExercicios() {
     const input = document.getElementById('inputBuscaExercicios');
     const filtro = input.value.toUpperCase();
     const lista = document.getElementById("listaExerciciosModal");
-    // Procura por itens com a classe .item-exercicio (definida no HTML novo)
     const itens = lista.getElementsByClassName('item-exercicio');
 
     for (let i = 0; i < itens.length; i++) {
         const texto = itens[i].textContent || itens[i].innerText;
         if (texto.toUpperCase().indexOf(filtro) > -1) {
-            itens[i].style.display = "flex"; // Mantém layout flex
+            itens[i].style.display = "flex"; 
         } else {
             itens[i].style.display = "none";
         }

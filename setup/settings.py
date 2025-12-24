@@ -171,15 +171,15 @@ else:
 
 BASE_URL = 'https://app-do-juan.onrender.com'
 
-# CONFIGURAÇÃO PWA (APP INSTALÁVEL)
-PWA_APP_NAME = 'Juan Treinos'
-PWA_APP_DESCRIPTION = "O melhor tracker de treinos do mundo"
-PWA_THEME_COLOR = '#000000'
-PWA_BACKGROUND_COLOR = '#000000'
+# CONFIGURAÇÃO PWA (KRYEL PERFORMANCE)
+PWA_APP_NAME = 'Kryel Performance'
+PWA_APP_SHORT_NAME = 'Kryel'  
+PWA_APP_DESCRIPTION = "Plataforma de alta performance para treinos."
+PWA_THEME_COLOR = '#22d3ee'   
+PWA_BACKGROUND_COLOR = '#000000' 
 PWA_DISPLAY = 'standalone'
 PWA_SCOPE = '/'
 PWA_START_URL = '/'
-
 
 PWA_APP_ICONS = [
     {
@@ -188,6 +188,5 @@ PWA_APP_ICONS = [
         'type': 'image/png' 
     }
 ]
-
 
 PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'templates', 'serviceworker.js')

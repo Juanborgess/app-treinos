@@ -8,20 +8,15 @@ from django.db.models import Q, Sum, F, Max, Count
 from django.utils import timezone 
 from django.views.decorators.http import require_POST
 
-# Seus Models
 from .models import (
     Rotina, Treino, Exercicio, Serie, Metodo, 
     TreinoRealizado, SerieRealizada, Anotacao, 
     PesoUsuario, MedidaCorporal
 )
 
-# Seus Forms
 from .forms import RotinaForm, ExercicioForm, MetodoForm, CustomUserCreationForm
 
-# ============================================================================
 # 1. AUTENTICAÇÃO E CADASTRO
-# ============================================================================
-
 def cadastro(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -37,10 +32,7 @@ def cadastro(request):
     
     return render(request, 'treinos/cadastro.html', {'form': form})
 
-# ============================================================================
 # 2. PÁGINAS PRINCIPAIS (DASHBOARD)
-# ============================================================================
-
 @login_required(login_url='/login/')
 def home(request):
     rotinas = Rotina.objects.filter(usuario=request.user)
@@ -131,10 +123,7 @@ def perfil(request):
         'medidas': ultima_medida
     })
 
-# ============================================================================
 # 3. CRIAÇÃO E EDIÇÃO (ROTINAS, EXERCÍCIOS, MÉTODOS)
-# ============================================================================
-
 @login_required(login_url='/login/')
 def criar_rotina(request):
     if request.method == 'POST':
@@ -173,8 +162,6 @@ def criar_exercicio(request):
         form = ExercicioForm(request.POST)
         if form.is_valid():
             novo_exercicio = form.save()
-            
-            # Se veio de um treino, já adiciona e volta pra lá
             if treino_id:
                 treino = get_object_or_404(Treino, id=treino_id, usuario=request.user)
                 if treino.rotina:
@@ -204,10 +191,7 @@ def criar_metodo(request):
         form = MetodoForm()
     return render(request, 'treinos/criar_metodo.html', {'form': form})
 
-# ============================================================================
 # 4. EXECUÇÃO DO TREINO (CORE)
-# ============================================================================
-
 @login_required(login_url='/login/')
 def detalhe_rotina(request, id):
     rotina = get_object_or_404(Rotina, id=id, usuario=request.user)
@@ -226,7 +210,6 @@ def detalhe_rotina(request, id):
 def iniciar_treino(request, rotina_id):
     rotina = get_object_or_404(Rotina, id=rotina_id, usuario=request.user)
     
-    # Procura treino em aberto ou cria um novo
     treino = Treino.objects.filter(
         rotina=rotina, 
         usuario=request.user, 
@@ -244,30 +227,44 @@ def iniciar_treino(request, rotina_id):
     exercicios = rotina.get_exercicios_ordenados()
     metodos = Metodo.objects.all() 
     
-    # Prepara dados históricos (Ghost Set)
     for exercicio in exercicios:
-        # Tenta pegar a última série do sistema NOVO
-        ultima_serie = Serie.objects.filter(
-            exercicio=exercicio, 
-            treino__usuario=request.user
-        ).order_by('-id').first()
-        
-        # Se não achou, tenta no sistema ANTIGO
-        if not ultima_serie:
-            ultima_serie = SerieRealizada.objects.filter(
-                exercicio=exercicio,
-                treino__rotina__usuario=request.user
-            ).order_by('-id').first()
+        ultimo_treino_ref = Treino.objects.filter(
+            usuario=request.user,
+            finalizado=True,        
+            serie__exercicio=exercicio
+        ).order_by('-data').first()
+
+        ghost_set_str = None
+
+        if ultimo_treino_ref:
+            series_hist = Serie.objects.filter(
+                treino=ultimo_treino_ref,
+                exercicio=exercicio
+            ).order_by('id') 
             
-        if ultima_serie:
-            exercicio.ghost_set = f"{ultima_serie.peso}kg x {ultima_serie.repeticoes}"
-        else:
-            exercicio.ghost_set = "Sem histórico"
+            lista_cargas = [f"{s.peso}kg x {s.repeticoes}" for s in series_hist]
+            ghost_set_str = " | ".join(lista_cargas)
+
+        if not ghost_set_str:
+            ultimo_treino_antigo = TreinoRealizado.objects.filter(
+                rotina__usuario=request.user,
+                finalizado=True,
+                serierealizada__exercicio=exercicio
+            ).order_by('-data').first()
+            
+            if ultimo_treino_antigo:
+                series_antigas = SerieRealizada.objects.filter(
+                    treino=ultimo_treino_antigo,
+                    exercicio=exercicio
+                ).order_by('id')
+                lista_cargas = [f"{s.peso}kg x {s.repeticoes}" for s in series_antigas]
+                ghost_set_str = " | ".join(lista_cargas)
         
+        exercicio.ghost_set = ghost_set_str if ghost_set_str else "Sem histórico"
+
         anotacao = Anotacao.objects.filter(usuario=request.user, exercicio=exercicio).first()
         exercicio.nota_pessoal = anotacao.texto if anotacao else ""
 
-    # Carrega séries já feitas neste treino atual
     series_feitas = Serie.objects.filter(treino=treino)
     series_por_exercicio = {}
     for serie in series_feitas:
@@ -275,7 +272,6 @@ def iniciar_treino(request, rotina_id):
             series_por_exercicio[serie.exercicio.id] = []
         series_por_exercicio[serie.exercicio.id].append(serie)
 
-    # Prepara lista completa para o Modal de Adicionar
     todos_exercicios = Exercicio.objects.all().order_by('nome')
 
     return render(request, 'treinos/treino_em_andamento.html', {
@@ -284,10 +280,9 @@ def iniciar_treino(request, rotina_id):
         'treino': treino,
         'metodos': metodos,
         'series_por_exercicio': series_por_exercicio,
-        'todos_exercicios': todos_exercicios # ESSENCIAL PARA O MODAL
+        'todos_exercicios': todos_exercicios 
     })
 
-# Essa função serve como atalho/alias para voltar ao treino
 @login_required
 def treino_em_andamento(request, treino_id):
     treino = get_object_or_404(Treino, id=treino_id, usuario=request.user)
@@ -295,8 +290,6 @@ def treino_em_andamento(request, treino_id):
 
 @login_required(login_url='/login/')
 def finalizar_treino(request, treino_id):
-    # Verifica nos dois modelos (Novo e Antigo) para evitar erro 404
-    # Tenta sistema NOVO primeiro
     treino = Treino.objects.filter(id=treino_id, usuario=request.user).first()
     
     if treino:
@@ -304,7 +297,6 @@ def finalizar_treino(request, treino_id):
         treino.data = timezone.now()
         treino.save()
     else:
-        # Tenta sistema ANTIGO (caso seja um link velho)
         treino_antigo = get_object_or_404(TreinoRealizado, id=treino_id, rotina__usuario=request.user)
         treino_antigo.finalizado = True
         treino_antigo.save()
@@ -319,10 +311,7 @@ def cancelar_treino(request, treino_id):
     treino.delete()
     return redirect('detalhe_rotina', id=rotina_id)
 
-# ============================================================================
 # 5. API E AÇÕES (JSON)
-# ============================================================================
-
 @login_required
 @require_POST
 def salvar_serie(request, treino_id, exercicio_id):
@@ -340,7 +329,6 @@ def salvar_serie(request, treino_id, exercicio_id):
         if metodo_id:
             metodo = Metodo.objects.filter(id=metodo_id).first()
 
-        # Verifica Recorde Pessoal (PR)
         max_novo = Serie.objects.filter(
             exercicio=exercicio, 
             treino__usuario=request.user
@@ -378,7 +366,6 @@ def salvar_serie(request, treino_id, exercicio_id):
 
 @login_required
 def excluir_serie(request, serie_id):
-    # Tenta excluir do sistema NOVO
     serie = Serie.objects.filter(id=serie_id).first()
     if serie and serie.treino.usuario == request.user:
         serie.delete()
@@ -406,14 +393,11 @@ def salvar_anotacao(request):
 
 @login_required
 def adicionar_exercicio_treino(request, treino_id, exercicio_id):
-    # Versão para Redirecionamento (Link direto)
     treino = get_object_or_404(Treino, id=treino_id, usuario=request.user)
     exercicio = get_object_or_404(Exercicio, id=exercicio_id)
     
     if treino.rotina:
         treino.rotina.exercicios.add(exercicio)
-        
-        # Opcional: Adiciona na ordem se não estiver
         if treino.rotina.ordem_exercicios:
             lista = treino.rotina.ordem_exercicios.split(',')
             if str(exercicio.id) not in lista:
@@ -424,7 +408,6 @@ def adicionar_exercicio_treino(request, treino_id, exercicio_id):
 
 @login_required
 def api_adicionar_exercicio_treino(request, treino_id, exercicio_id):
-    # Versão API (chamada pelo JS)
     treino = get_object_or_404(Treino, id=treino_id, usuario=request.user)
     exercicio = get_object_or_404(Exercicio, id=exercicio_id)
     
@@ -437,12 +420,10 @@ def api_adicionar_exercicio_treino(request, treino_id, exercicio_id):
 def remover_exercicio_treino(request, treino_id, exercicio_id):
     treino = get_object_or_404(Treino, id=treino_id, usuario=request.user)
     exercicio = get_object_or_404(Exercicio, id=exercicio_id)
-    
-    # Remove da Rotina vinculada ao treino
+
     if treino.rotina:
         treino.rotina.exercicios.remove(exercicio)
 
-    # Limpa as séries desse exercício no treino atual
     Serie.objects.filter(treino=treino, exercicio=exercicio).delete()
     
     return JsonResponse({'status': 'ok'})
@@ -491,10 +472,7 @@ def substituir_exercicio(request, rotina_id):
             return JsonResponse({'status': 'erro', 'msg': str(e)}, status=400)
     return JsonResponse({'status': 'erro'}, status=400)
 
-# ============================================================================
 # 6. UTILITÁRIOS E EXTRAS
-# ============================================================================
-
 @login_required(login_url='/login/')
 def adicionar_peso(request):
     if request.method == "POST":
@@ -547,7 +525,6 @@ def excluir_rotina(request, rotina_id):
 
 @login_required(login_url='/login/')
 def estatisticas(request):
-    # Junta estatísticas do sistema antigo e novo (simplificado)
     dados = Serie.objects.filter(
         treino__usuario=request.user
     ).values('exercicio__grupo_muscular').annotate(total=Count('id')).order_by('-total')
@@ -600,7 +577,6 @@ def detalhe_treino_antigo(request, treino_id):
 
 @login_required(login_url='/login/')
 def api_dados_grafico(request, exercicio_id):
-    # Busca dados APENAS do sistema novo para o gráfico (pode ser expandido depois)
     series = Serie.objects.filter(
         exercicio_id=exercicio_id, treino__usuario=request.user
     ).order_by('treino__data')

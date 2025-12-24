@@ -7,10 +7,9 @@ function carregarGrafico() {
     const exercicioId = select.value;
     const loading = document.getElementById('loading');
     
-    // Mostra o spinner de carregando
+    
     loading.style.display = 'block';
 
-    // Busca os dados no Backend
     fetch(`/api/grafico/${exercicioId}/`)
         .then(response => response.json())
         .then(data => {
@@ -52,7 +51,7 @@ function renderizarGrafico(labels, dados) {
                 pointRadius: 5,
                 pointHoverRadius: 7,
                 fill: true,
-                tension: 0.4 // Curva suave
+                tension: 0.4 
             }]
         },
         options: {
